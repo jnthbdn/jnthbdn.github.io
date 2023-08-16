@@ -92,7 +92,7 @@ logo_home_link = "/"
 main_menu = [
               {url="/", name="Posts"},
               {url="/about/", name="A Propos"},
-              {url="/contact/", name="Contact"},
+            #   {url="/contact/", name="Contact"},
             #   {url="https://google.com", name="Google", external=true},
 ]
 
