@@ -1,10 +1,10 @@
 +++
-title = "about"
-path = "about"
-
-[extra]
-date = 2019-03-21
+title = "A propos de moi..."
 +++
+Bon là il faut que je vous parle de moi...
 
-Yet another theme for yet another static site generator; that said, I hope you
-like it.
+
+Promis je vais faire cette page !
+
+
+`todo!()`
