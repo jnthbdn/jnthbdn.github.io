@@ -79,7 +79,7 @@ center = false
 # og_preview_img = ""
 
 # Copyright notice if desired. Defaults to
-# copyright = "copyright notice here"
+copyright = """<span>Powered by <a href="https://www.getzola.org/">Zola</a></span><span>:: Theme made by <a href="https://github.com/ejmg">ejmg</a></span>"""
 
 # What is displayed in the top left corner of the website. Default is zerm.
 logo_text = "Dernier side project"
