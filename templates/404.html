@@ -1,0 +1,17 @@
+{% extends "index.html" -%}
+
+{%- block title %}
+    <title>404 - Page non trouvée</title>
+{%- endblock title -%}
+
+{%- block main -%}
+
+<div style="flex:none">
+    <p>
+    Hmmm.... J'ai (encore) dû casser quelque chose.<br>
+    Désolé, mais la page demandée ne peut être affichée.
+    </p>
+    <p>Retour aux&nbsp;<a href="{%- if config.extra.logo_home_link -%}{{ config.extra.logo_home_link }}{%- else -%}{{ config.base_url }}{%- endif -%}">posts ?</a></p>
+<div style="flex:none">
+
+{%- endblock main -%}
