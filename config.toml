@@ -1,6 +1,22 @@
 # The URL the site will be built for
 base_url = "https://jnthbdn.github.io"
 
+# Used in RSS by default
+title = "Mon dernier side project"
+description = "Un endroit où l'on pourra un jour trouver une réponse à ses questions"
+
+# The default language, used in RSS
+# TODO: I would love to support more languages and make this easy to handle
+# with other facets of the theme.
+default_language = "fr"
+
+# Whether to generate a RSS feed automatically
+generate_feed = true
+# 'atom.xml' (default if unspecified) and 'rss.xml' are officially supported
+# values for feed_filename in this theme. All other filenames will assume a
+# link type of 'application/rss+xml'.
+# feed_filename = "atom.xml"
+
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
 
@@ -66,7 +82,7 @@ center = false
 # copyright = "copyright notice here"
 
 # What is displayed in the top left corner of the website. Default is zerm.
-logo_text = "Dernier side-project"
+logo_text = "Dernier side project"
 
 # Link in logo. Default returns you to $BASE_URL.
 logo_home_link = "/"
