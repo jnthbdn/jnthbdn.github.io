@@ -28,3 +28,51 @@ figure {
         font-style: italic;
     }
 }
+
+
+blockquote{
+    span.diff {
+        color:red;
+        font-weight: bold;
+    }
+
+    div.author{
+        margin-top: 1em;
+        font-size: 0.9em;
+        text-align: right;
+        padding-right: 16px;
+        color: var(--accent-alpha-70)
+    }
+}
+
+.tiny{
+    font-size: 0.88em;
+}
+
+div.encart{
+
+    display: flex;
+    flex-direction: row;
+    border: 2px solid var(--accent-alpha-20);
+    width: calc(100% - 32px);
+    margin-left: auto;
+
+    .icon {
+        padding: 0;
+        margin: 0;
+        font-size: 1.5em;
+        padding: 5px 5px;
+    }
+
+    .content{
+        padding: 5px 10px;
+    }
+}
+
+.center{
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
