@@ -361,8 +361,9 @@ Si notre hypothèse est juste les bits 7 à 3 sont la valeur entière de la temp
 Maintenant il reste à comprendre ce qu'est le 27e octet qui change tout le temps... _tout le temps_...  _tout le temps_... ... ...  UN [CHECKSUM](https://fr.wikipedia.org/wiki/Somme_de_contr%C3%B4le) !  
 En effet, le climatiseur doit pouvoir vérifier si la trame qu'il a reçue est correcte et pour cela le plus simple est d'utiliser un checksum.  
 Je ne vais pas faire durer le suspense plus longtemps. D'après mes observations le checksum peut être calculé de deux manières différentes:
- 1. (Complexe) En calculant l'inverse du complément à deux de la somme des octets de 10 à 26 modulo 1024[^5] : $$ \neg \left( \left( \sum_{i=10}^{26} octet_i \mod 1024 \right) + 1 \right) $$ 
- 2. (Simple) On soustrait 1 à la somme des octets de 10 à 26
+ 1. (Complexe) En calculant l'inverse du complément à deux de la somme des octets de 10 à 26 modulo 1024[^5] :
+$$ \neg \left( 1 + \left( \sum_{i=10}^{26} octet_i \mod 1024 \right) \oplus 1023 \right) $$ 
+ 2. (Simple) On soustrait 1 à la somme des octets de 10 à 26 modulo 1024: $$ \left( \sum_{i=10}^{26} octet_i \mod 1024 \right) - 1 $$ 
 
 Étant donnée que ça revient au même.... on va soustraire 1.
 
