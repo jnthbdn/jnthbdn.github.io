@@ -1,3 +1,8 @@
 {% macro extended_footer() %}
 <p class="center">Retrouvez ce blog sur <a href="https://github.com/jnthbdn/jnthbdn.github.io">GitHub</a></p>
+<script src="{{ get_url(path="elasticlunr.min.js") }}"></script>
+<script src="{{ get_url(path="lunr.stemmer.support.js") }}"></script>
+<script src="{{ get_url(path="lunr.fr.js") }}"></script>
+<script src="{{ get_url(path="search_index.fr.js") }}"></script>
+<script src="{{ get_url(path="search.js") }}"></script>
 {% endmacro extended_footer %}

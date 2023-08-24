@@ -76,3 +76,35 @@ div.encart{
 .right {
     text-align: right;
 }
+
+.search_box {
+    input[type=text]{
+        display: block;
+        width: 95%;
+        font-size: 1.2em;
+        padding: 4px 8px;
+        margin: auto;
+    }
+
+    // div{
+    //     margin-left: 2em;
+    // }
+
+    #search_box_result{
+        div{
+            width: calc(100% - 2em);
+            margin-left: 2em;
+        }
+
+        h4{
+            border-bottom: none;
+        }
+
+        // div:nth-child(even){
+        // }
+
+        // div:nth-child(odd){
+        //     margin-right: 2em;
+        // }
+    }
+}

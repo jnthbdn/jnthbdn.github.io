@@ -1,0 +1,12 @@
+<div class="search_box">
+    <input type="text" id="search_box_input" placeholder="Rechercher..." />
+    <div id="search_box_result">
+    </div>
+</div>
+
+<script>
+    window.addEventListener("load", function(){
+        console.log("top à la vachette !")
+        new SearchBox("search_box_input", "search_box_result");
+    });
+</script>
