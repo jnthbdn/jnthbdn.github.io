@@ -378,8 +378,8 @@ Si notre hypothèse est juste les bits 6 à 2 sont la valeur entière de la temp
 ### Le checksum
 Maintenant il reste à comprendre ce qu'est le 27e octet qui change tout le temps... _tout le temps_...  _tout le temps_... ... ...  UN [CHECKSUM](https://fr.wikipedia.org/wiki/Somme_de_contr%C3%B4le) !
 
-En effet, le climatiseur doit pouvoir vérifier si la trame qu'il a reçue est correcte et pour cela le plus simple est d'utiliser un _checksum_. Comme son nom l'indique il s'agit d'une _somme_, mais comme il est codé sur un octet, la valeur finale sera le reste de la division par 256 ($ 2^8 $). Le _header_ (qui ne change jamais) ne rentre pas dans le calcul, uniquement les octets du _body_ son utilisés.
-$$ checksum = \left( \sum_{i=6}^{27} octet_i \right) \mod 256 $$ 
+En effet, le climatiseur doit pouvoir vérifier si la trame qu'il a reçue est correcte et pour cela le plus simple est d'utiliser un _checksum_. Comme son nom l'indique il s'agit d'une _somme_, mais comme il est codé sur un octet, la valeur finale sera le reste de la division par 256 ($ 2^8 $). Le _header_ (qui ne change jamais) ne rentre pas dans le calcul, uniquement les octets du _body_ son utilisés (et sauf le checksum, évidemment).
+$$ checksum = \left( \sum_{i=9}^{26} octet_i \right) \mod 256 $$ 
 En prenant comme example notre trame précédente :
 $$checksum = 11101001 = (233)\_{10}\newline
 \ \newline
