@@ -52,7 +52,7 @@ Sur l'oscillogramme (je sais... ce mot fait vieux 😄), on peut noter que le si
 {{figure(src="./img/header.BMP",
        click_to_open=true,
        style="width: 75%;",
-       caption="header composé de 9 octets -- 1V/div - 5ms/div",
+       caption="header composé de 8 octets -- 1V/div - 5ms/div",
        caption_style="") }}
 
 Observons le signal de plus près.
