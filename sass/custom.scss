@@ -1,22 +1,29 @@
+a{
+    &:hover{
+        color: var(--accent-alpha-70);
+    }
+}
+
 figure {
+    &:nth-of-type(odd){
+        margin-right: auto;
+        text-align: left;
+    }
+    
+    &:nth-of-type(even){
+        margin-left: auto;
+        text-align: right;
+    }
+
     &.center{
         margin-left: auto;
         margin-right: auto;
         text-align: center;
     }
-
-    &.right{
-        margin-left: auto;
-        text-align: right;
-    }
-
-    &.left{
-        margin-right: auto;
-        text-align: left;
-    }
         
     img {
-        display: inline-block
+        display: inline-block;
+        border-radius: 5px;
     }
 
     figcaption {
@@ -86,10 +93,6 @@ div.encart{
         margin: auto;
     }
 
-    // div{
-    //     margin-left: 2em;
-    // }
-
     #search_box_result{
         div{
             width: calc(100% - 2em);
@@ -99,12 +102,5 @@ div.encart{
         h4{
             border-bottom: none;
         }
-
-        // div:nth-child(even){
-        // }
-
-        // div:nth-child(odd){
-        //     margin-right: 2em;
-        // }
     }
 }
