@@ -47,7 +47,7 @@ Bon n'ayant pas d'analyseur logique, j'ai commencé par utiliser mon oscilloscop
        caption="Trame infrarouge -- 1V/div - 25ms/div",
        caption_style="") }}
 La trame est plutôt longue (quasiment 150 ms), on peut distinguer deux "parties" dans la trame. Puisqu'elles ne font pas la même taille, ce n'est pas de la redondance, mais bien deux informations distinctes. Pour faire simple, on va appeler la première partie le **header**, et la seconde le **body**.  
-Sur l'oscillogramme (je sais... ce mot fait vieux 😄), on peut noter que le signal de séparation est identique au signal du début de la trame, on va donc appeler **start bit**, un état haut long suivi d'un état bas long.
+Sur l'oscillogramme (je sais... ce mot fait vieux 😄), on peut noter que le signal de séparation est identique au signal du début de la trame, on va donc appeler **bit de start**, un état haut long suivi d'un état bas long.
 
 {{figure(src="./img/header.BMP",
        click_to_open=true,
@@ -69,7 +69,7 @@ Pour simplifier la lecture, je vais garder les états présents sur les captures
        caption="1er octect du header -- 1V/div - 500µs/div",
        caption_style="") }}
 
-Le signal semble être composé d'état bas toujours de même durée (~ 400µs) et d'état haut de durée variable (soit ~ 400µs, soit ~ 1300µs), en plus du _start bit_ observé précédemment. C'est donc en modifiant la durée de l'état haut, que la télécommande peut envoyer des données au format binaires.
+Le signal semble être composé d'état bas toujours de même durée (~ 400µs) et d'état haut de durée variable (soit ~ 400µs, soit ~ 1300µs), en plus du _bit de start_ observé précédemment. C'est donc en modifiant la durée de l'état haut, que la télécommande peut envoyer des données au format binaires.
 > Dans ce cas-là, c'est quoi un '1' c'est quoi un '0' ?
 > <div class="author">Un inconnu à l'air cynique</div>
 
@@ -312,9 +312,9 @@ La fonction commence avec quelques variables :
  - `id_bit` : Position du prochain bit à écrire
  - `id_octet` : Position de l'octet en cours d'écriture
 
-Ensuite, le corps de la fonction : une boucle `for` qui va itérer sur toutes les mesures. Puisque les bits sont définis par deux impulsions (basse et haute), on récupère les deux à chaque fois. Les deux premières mesures peuvent être sautées, puisque c'est le _start bit_. On commence par stocker, temporairement, les deux temps dans les variables `low` et `high`, puis on s'en sert pour identifier quelle information ils représentent :
+Ensuite, le corps de la fonction : une boucle `for` qui va itérer sur toutes les mesures. Puisque les bits sont définis par deux impulsions (basse et haute), on récupère les deux à chaque fois. Les deux premières mesures peuvent être sautées, puisque c'est le _bit de start_. On commence par stocker, temporairement, les deux temps dans les variables `low` et `high`, puis on s'en sert pour identifier quelle information ils représentent :
   1. Une des deux données à pour valeur `0`, cela signifie qu'il n'y a plus rien à traiter, on sort de la boucle.
-  2. La valeur `high` est supérieure à 3000, c'est la fin du header, on ignore donc ces valeurs plus les deux suivantes du _start bit_.
+  2. La valeur `high` est supérieure à 3000, c'est la fin du header, on ignore donc ces valeurs plus les deux suivantes du _bit de start_.
   3. La valeur `high` est supérieure à 1000 (mais inférieur a 3000), c'est un bit de valeur `1`. On l'enregistre et on incrémente le compteur `id_bit`.
   4. la valeur de `high` est inférieure à 600, c'est un bit de valeur `0`. Le bit en cours vaut dejà 0, on incrémente le compteur `id_bit`
   5. Si aucun des cas suivant n'est le bon, alors on considère que c'est une erreur est on l'affiche.
