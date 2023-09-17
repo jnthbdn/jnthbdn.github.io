@@ -38,6 +38,9 @@ highlight_code = true
 
 highlight_theme = "axar" # Other dark themes that work: "1337", "agola-dark",
                          # "visual-studio-dark"
+render_emoji = true
+
+external_links_target_blank = true
 
 [search]
 # Whether to include the title of the page/section in the index
