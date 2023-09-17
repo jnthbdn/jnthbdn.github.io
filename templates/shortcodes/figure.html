@@ -1,7 +1,7 @@
 {% if src %}
-  <figure>
+  <figure {% if class %} class="{{ class | safe }}"{% endif %}>
     {% if click_to_open %}<a href="{{src | safe}}" target="_blank">{% endif %}
-    <img src="{{ src | safe }}"{% if alt %} alt="{{ alt }}"{% endif %}{% if style %} style="{{ style }}"{% endif %} />
+    <img src="{{ src | safe }}"{% if alt %} alt="{{ alt }}"{% endif %}{% if style %} style="{{ style | safe }}"{% endif %} />
     {% if click_to_open %}</a>{% endif %}
     {% if caption %}
       <figcaption {% if caption_style %} style="{{ caption_style | safe }}"{% endif %}>{{ caption }}</figcaption>
