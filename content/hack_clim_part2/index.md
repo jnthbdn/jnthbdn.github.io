@@ -76,13 +76,18 @@ Quasiment tout ce qui émet de la lumière, y compris le soleil, produit des inf
 
 La méthode la plus simple consiste à appliquer une technique similaire à celle utilisée en émission radio, en utilisant une porteuse. Le récepteur peut ainsi distinguer les informations du signal parmi le bruit en cherchant une fréquence de 38 kHz. Cette fréquence de 38 kHz sert de référence pour séparer le _signal_ d'intérêt du fond infrarouge, permettant ainsi au récepteur de reconnaître et de traiter correctement les données transmises.
 
-
 # Sortez vos ESP ! A l'abordage ! 🏴‍☠️
 
 ## Générer la porteuse
 Bien ! Commençons par le plus simple. La porteuse est donc un signal carré, de fréquence 38kHz (pour la 30e fois). On pourrait prendre un NE555 :heart:, deux résistances de 4 ohms et un condensateur de 4.8 µF... Oui ce sera bien... Mais je vous propose d'utiliser le [PWM](https://fr.wikipedia.org/wiki/Modulation_de_largeur_d%27impulsion) de l'ESP, c'est plus simple est ça marche tout aussi bien...
 
-Le fonctionnement est très simple, on va régler la fréquence du PWM sur la valeur de notre porteuse. Quand on voudra émettre en passera le [rapport cyclique](https://fr.wikipedia.org/wiki/Rapport_cyclique) à 50%, et a 0% lorsque l'on veut arrêter.
+Le fonctionnement est très simple, on va régler la fréquence du PWM sur la valeur de notre porteuse et le [rapport cyclique](https://fr.wikipedia.org/wiki/Rapport_cyclique) à 50%. En utilisant un transistor, on pourra "allumer" ou "éteindre" notre LED, sans nous soucier de la porteuse.
+
+{{figure(src="./img/schema.png",
+       click_to_open=true,
+       style="width: 75%;",
+       caption="Schematique simplifié de la LED IR",
+       caption_style="") }}
 
 ## Si on codait
 
@@ -111,7 +116,7 @@ La dernière constante `PANASONIC_DATA_SIZE` nous servira pour les itérations, 
 
 ### L'initialisation
 ```c++
-PanasonicRemote(byte pin_led) : pin_led{pin_led}, data{ new uint8_t[PANASONIC_DATA_SIZE] }{
+PanasonicRemote(byte pin_pwm, byte pin_led) : pin_pwm{pin_pwm}, pin_led{pin_led}, data{ new uint8_t[PANASONIC_DATA_SIZE] }{
     // Header
     data[0] = 0b00000010;
     data[1] = 0b00100000;
@@ -147,8 +152,10 @@ PanasonicRemote(byte pin_led) : pin_led{pin_led}, data{ new uint8_t[PANASONIC_DA
 void init(){
     analogWriteRange(1024);
     analogWriteFreq(38000);
+    pinMode(pin_pwm, OUTPUT);
+    analogWrite(pin_pwm, 512);
     pinMode(pin_led, OUTPUT);
-    analogWrite(pin_led, 0);
+    digitalWrite(pin_led, LOW);
 }
 ```
 
@@ -161,9 +168,11 @@ Et voici `init`, la fonction qui met en place la porteuse. Pour ne pas avoir de 
  1. Par pure convention et parce que j'ai l'habitude.
  2. Potentiellement on peut vouloir utiliser le PWM ailleurs dans le projet, donc autant garder une plage de valeur correcte.
 
-Il faudra donc utiliser `512` pour mettre le duty cycle à 50% (et 0 pour le mettre à 0%, j'espère que vous suivez).
+Il faut donc utiliser la valeur `512` pour mettre le duty cycle à 50% (et 0 pour le mettre à 0%, j'espère que vous suivez).
 
 Il nous reste à préciser la valeur de la fréquence avec `analogWriteFreq`. Les deux autres fonctions paramètrent la pin en sortie, et position le PWM à 0%.
+
+En fin on prépare notre `pin_led` qui commande le transistor (par défaut on la position à l'état bas).
 
 ### On / Off
 
@@ -286,11 +295,11 @@ void send(){
 // [...]
 
 inline void set_high(){
-    analogWrite(pin_led, 512);
+    digitalWrite(pin_led, HIGH);
 }
 
 inline void set_low(){
-    analogWrite(pin_led, 0);
+    digitalWrite(pin_led, LOW);
 }
 ```
 Tout ce qui nous reste à faire maintenant, c'est d'envoyer nos paramètres. Comme toutes les trames on doit envoyer notre "bit de start" pour prévenir le récepteur que l'on va envoyer des données, c'est `start_bit` qui s'en charge. Les premières données transmises sont celles du header, soit les 8 premiers octets de notre trame. On remarque l'utilisation de `set_high` et `set_low` qui ne sont présentes que pour rendre le code plus lisible. On retrouve nos constantes de temps que nous avons déclarées au début du programme.
