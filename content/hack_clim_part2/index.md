@@ -170,9 +170,7 @@ Et voici `init`, la fonction qui met en place la porteuse. Pour ne pas avoir de 
 
 Il faut donc utiliser la valeur `512` pour mettre le duty cycle à 50% (et 0 pour le mettre à 0%, j'espère que vous suivez).
 
-Il nous reste à préciser la valeur de la fréquence avec `analogWriteFreq`. Les deux autres fonctions paramètrent la pin en sortie, et position le PWM à 0%.
-
-En fin on prépare notre `pin_led` qui commande le transistor (par défaut on la position à l'état bas).
+Il nous reste à préciser la valeur de la fréquence avec `analogWriteFreq`. Les autres fonctions paramètrent les pin en sortie, et leurs valeurs par défauts.
 
 ### On / Off
 
