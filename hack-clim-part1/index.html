@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+    <title>Hack télécommande climatiseur (Part 1) - Jnthbdn</title>
+    
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"><meta name="description" content="Un endroit où l&#x27;on pourra un jour trouver une réponse à ses questions Hack télécommande climatiseur (Part 1) Commander sa clim via Home Assistant va être plus compliqué que prévus..."/><meta name="keywords" content="bidouille, électronique, hack, climatiseur, Home Assistant" />
+    <meta property="og:title" content="Mon dernier side project -&nbsp;Hack télécommande climatiseur (Part 1)" />
+    <meta property="og:type" content="website"/><meta property="og:url" content="https:&#x2F;&#x2F;jnthbdn.github.io&#x2F;hack-clim-part1&#x2F;"/><meta property="og:description" content="Commander sa clim via Home Assistant va être plus compliqué que prévus..."/>
+    <link rel="preload" href="https://jnthbdn.github.io/assets/fonts/FiraCode-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="https://jnthbdn.github.io/assets/fonts/FiraCode-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://jnthbdn.github.io/style.css?h=97e262212a0704163528">
+    <link rel="stylesheet" href="https://jnthbdn.github.io/color/green.css?h=c685075d8d57bb1e0d87"><link rel="stylesheet" href="https://jnthbdn.github.io/custom.css?h=54c8541dfa5a34384d5a">
+    
+<link rel="alternate" type="application/atom+xml" title="Mon dernier side project RSS" href="https://jnthbdn.github.io/atom.xml">
+  
+
+  <link rel="stylesheet" href="https://jnthbdn.github.io/assets/katex/katex.min.css">
+
+  <script defer type="text/javascript" src="https://jnthbdn.github.io/assets/katex/katex.min.js"></script>
+  <script defer type="text/javascript" src="https://jnthbdn.github.io/assets/katex/mathtex-script-type.min.js"></script>
+
+  <script defer src="https://jnthbdn.github.io/assets/katex/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+				delimiters: [
+					{left: '$$', right: '$$', display: true},
+					{left: '$', right: '$', display: false},
+					{left: '\\(', right: '\\)', display: false},
+					{left: '\\[', right: '\\]', display: true}
+				]
+			});"></script>
+
+
+  </head>
+    <body>
+        <div class="container center">
+<header class="header">
+    <div class="header__inner">
+        <div class="header__logo">
+            <a href="&#x2F;">
+    <div class="logo">
+        Dernier side project
+    </div>
+</a>
+        </div>
+        <div class="menu-trigger">menu</div>
+    </div>
+    
+    <nav class="menu">
+        <ul class="menu__inner menu__inner--desktop">
+            
+            
+                    <li>
+                        <a href="
+    
+        https://jnthbdn.github.io
+    
+">Posts</a>
+                    </li>
+                
+                    <li>
+                        <a href="
+    
+        https://jnthbdn.github.io/about
+    
+">A Propos</a>
+                    </li>
+                
+                    <li>
+                        <a href="
+    
+        https://jnthbdn.github.io/search
+    
+">Rechercher</a>
+                    </li>
+                <ul class="menu__sub-inner">
+                        <li class="menu__sub-inner-more-trigger">plus ▾</li>
+                        <ul class="menu__sub-inner-more hidden">
+                            
+        <li>
+            <a href="
+    
+        https://jnthbdn.github.io/categories
+    
+">Liste catégories</a>
+        </li>
+        <li>
+            <a href="
+    
+        https://jnthbdn.github.io/tags
+    
+">Liste #tags</a>
+        </li>
+                        </ul>
+                    </ul>
+            </ul>
+
+        <ul class="menu__inner menu__inner--mobile">
+            
+        <li>
+            <a href="
+    
+        https://jnthbdn.github.io
+    
+">Posts</a>
+        </li>
+        <li>
+            <a href="
+    
+        https://jnthbdn.github.io/about
+    
+">A Propos</a>
+        </li>
+        <li>
+            <a href="
+    
+        https://jnthbdn.github.io/search
+    
+">Rechercher</a>
+        </li>
+        <li>
+            <a href="
+    
+        https://jnthbdn.github.io/categories
+    
+">Liste catégories</a>
+        </li>
+        <li>
+            <a href="
+    
+        https://jnthbdn.github.io/tags
+    
+">Liste #tags</a>
+        </li>
+        </ul>
+    </nav>
+
+    </header>
+<div class="content"><article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https:&#x2F;&#x2F;jnthbdn.github.io&#x2F;hack-clim-part1&#x2F;">Hack télécommande climatiseur (Part 1)</a>
+            </h1>
+            
+    <div class="post-meta">
+        <span class="post-date">2023.07.16
+                </span>
+
+        <span class="post-author"></span>
+
+        
+
+    
+    :: {<a href="https://jnthbdn.github.io/categories/bidouille/">bidouille</a>,
+            <a href="https://jnthbdn.github.io/categories/electronique/">électronique</a>} 
+
+            
+    ::
+    #<a href="https://jnthbdn.github.io/tags/hack/">hack</a>
+        
+    #<a href="https://jnthbdn.github.io/tags/climatiseur/">climatiseur</a>
+        
+    #<a href="https://jnthbdn.github.io/tags/home-assistant/">Home Assistant</a>
+        
+    
+            
+        
+    </div>
+
+            
+    
+
+
+<div class="toc" id="nav-container">
+	<p class="toc-head">Table of Contents</p>
+		<div id="nav-content" >
+		<ul>
+		
+			<li>
+				<a href="https://jnthbdn.github.io/hack-clim-part1/#pourquoi-faire-ca">Pourquoi faire ça ?</a>
+				
+			</li>
+		
+			<li>
+				<a href="https://jnthbdn.github.io/hack-clim-part1/#les-ennuis-commencent">Les ennuis commencent</a>
+				
+					<ul>
+						
+							<li>
+								<a href="https://jnthbdn.github.io/hack-clim-part1/#observation-du-signal">Observation du signal</a>
+							</li>
+							
+						
+							<li>
+								<a href="https://jnthbdn.github.io/hack-clim-part1/#comprendre-le-signal">Comprendre le signal</a>
+							</li>
+							
+						
+							<li>
+								<a href="https://jnthbdn.github.io/hack-clim-part1/#decoder-le-signal">Décoder le signal</a>
+							</li>
+							
+								<ul>
+								
+									<li>
+										<a href="https://jnthbdn.github.io/hack-clim-part1/#ecoute-enregistrement">Ecoute &amp; Enregistrement</a>
+										
+									</li>
+								
+									<li>
+										<a href="https://jnthbdn.github.io/hack-clim-part1/#analyse-affichage">Analyse &amp; Affichage</a>
+										
+									</li>
+								
+								</ul>
+							
+						
+							<li>
+								<a href="https://jnthbdn.github.io/hack-clim-part1/#comprendre-le-signal-1">Comprendre le signal</a>
+							</li>
+							
+								<ul>
+								
+									<li>
+										<a href="https://jnthbdn.github.io/hack-clim-part1/#la-temperature">La Température</a>
+										
+									</li>
+								
+									<li>
+										<a href="https://jnthbdn.github.io/hack-clim-part1/#le-checksum">Le checksum</a>
+										
+									</li>
+								
+									<li>
+										<a href="https://jnthbdn.github.io/hack-clim-part1/#marche-arret">Marche &#x2F; Arret</a>
+										
+									</li>
+								
+									<li>
+										<a href="https://jnthbdn.github.io/hack-clim-part1/#mode-de-ventilation">Mode de ventilation</a>
+										
+									</li>
+								
+								</ul>
+							
+						
+							<li>
+								<a href="https://jnthbdn.github.io/hack-clim-part1/#la-suite">La suite</a>
+							</li>
+							
+						
+					</ul>
+				
+			</li>
+		
+		</ul>
+		</div>
+</div>
+
+</header><h1 id="pourquoi-faire-ca">Pourquoi faire ça ?<a class="zola-anchor" href="#pourquoi-faire-ca" aria-label="Anchor link for: pourquoi-faire-ca">§</a>
+</h1>
+<p>Cela fait déjà quelque temps que j'ai passé la domotique de la maison sous HomeAssistant. Entre la simplicité d'installation (sur un Raspberry Pi), d'utilisation et surtout l'application pour téléphone (Android &amp; iPhone), c'est juste parfait. Dans un premier temps se fut le contrôle des lumières intérieurs, puis extérieurs (autant en profiter quand on fait les travaux 😄), le bassin des poissons et pour terminer par les prises.</p>
+<p>Justement, les prises, parlons-en ! Ce sont de simple prise (probablement acheté sur Amazon à quelques euros), fonctionnant en 433 MHz, rien de sorcier un Arduino, un module RF et la lib qui va bien et hop ! On copie les codes d'allumage et d'extinction, tout va bien !</p>
+<p>Bref ! Ma folie de domotisation (<em>ça se dit ? 🤔</em>), étant passé je reste avec une bonne impression, beaucoup de câbles tirés, mais dans l'ensemble rien de compliqué...</p>
+<p><em>Pour être tout à fait honnête je crois que ce qui m'a consommé le plus de temps, était l'intégration de la météo du jour... Pour ne pas s'en servir au final 😒</em></p>
+<p>Ainsi il y a quelques jours, on se dit que cela serait &quot;vachement bien&quot; de pouvoir allumer/éteindre la clim à distance ! Que ce soit parce qu’on a la flemme de se lever prendre la télécommande (ou pire, monté à l'étage la chercher 😱), ou juste parce qu’on est sorti (il fait 200°C à l'ombre) et qu'on voudrait bien que la chambre soit fraîche en arrivant.</p>
+<p>A cet instant très précis, je pensais que cela devait être simple... </p>
+<h1 id="les-ennuis-commencent">Les ennuis commencent<a class="zola-anchor" href="#les-ennuis-commencent" aria-label="Anchor link for: les-ennuis-commencent">§</a>
+</h1>
+<p>La particularité de la télécommande c'est qu'elle fonctionne en <a rel="noopener" target="_blank" href="https://fr.wikipedia.org/wiki/Infrarouge">infrarouge</a><sup class="footnote-reference"><a href="#1">1</a></sup>. Non pas que ce soit particulier pour une télécommande, mais plutôt pour moi (ça fait trèèès longtemps que j'ai plus joué avec de l'infrarouge).</p>
+<blockquote>
+<p>Bof !...un récepteur, une copie des signaux logiques et on est bon !?</p>
+<div class="author">Moi peu de temps avant le drame</div>
+</blockquote>
+<p>Après quelques minutes (intense) de réflexion, l’idée de copier les codes envoyés par la télécommande c'est avéré être d'une bêtise assez profonde. Pour simplifier les choses, je ne veux que contrôler 3 fonctions :</p>
+<ol>
+<li>ON / OFF</li>
+<li>La température</li>
+<li>Le mode de ventilation</li>
+</ol>
+<p>Or, ma climatision me permet d'aller de 16°C à 30°C par tranche de 0.5°C, ce qui fait 29*4 = 116 codes différents (+ 1 pour le mode OFF), ça fait beaucoup... Alors qu'il serait plus simple de comprendre le signal et de l'envoyer en fonction de la température et du mode que je souhaite.</p>
+<h2 id="observation-du-signal">Observation du signal<a class="zola-anchor" href="#observation-du-signal" aria-label="Anchor link for: observation-du-signal">§</a>
+</h2>
+<p>Bon n'ayant pas d'analyseur logique, j'ai commencé par utiliser mon oscilloscope et un simple montage utilisant un récepteur infrarouge (VS1838B).</p>
+<p>
+  <figure >
+    <a href="./img/ensemble.BMP" target="_blank">
+    <img src="./img/ensemble.BMP" style="width: 75%;" />
+    </a>
+    
+      <figcaption >Trame infrarouge -- 1V&#x2F;div - 25ms&#x2F;div</figcaption>
+    
+  </figure>
+
+
+La trame est plutôt longue (quasiment 150 ms), on peut distinguer deux &quot;parties&quot; dans la trame. Puisqu'elles ne font pas la même taille, ce n'est pas de la redondance, mais bien deux informations distinctes. Pour faire simple, on va appeler la première partie le <strong>header</strong>, et la seconde le <strong>body</strong>.<br />
+Sur l'oscillogramme (je sais... ce mot fait vieux 😄), on peut noter que le signal de séparation est identique au signal du début de la trame, on va donc appeler <strong>bit de start</strong>, un état haut long suivi d'un état bas long.</p>
+
+  <figure >
+    <a href="./img/header.BMP" target="_blank">
+    <img src="./img/header.BMP" style="width: 75%;" />
+    </a>
+    
+      <figcaption >header composé de 8 octets -- 1V&#x2F;div - 5ms&#x2F;div</figcaption>
+    
+  </figure>
+
+<p>Observons le signal de plus près.</p>
+<div class="encart">
+    <div class="icon">
+      
+        🚧
+        
+      
+    </div>
+    <div class="content"><p>Le signal présent capturé par l'oscilloscope est inversé. Le montage utilisé pour capturer les trames IR, inverse le signal. Il faut garder à l'esprit (surtout lors de la partie 2), qu'un &quot;état bas&quot; représente un &quot;état haut&quot; pour la LED IR émettrice.<br />
+Pour simplifier la lecture, je vais garder les états présents sur les captures d'écran.</p>
+</div>
+</div><h2 id="comprendre-le-signal">Comprendre le signal<a class="zola-anchor" href="#comprendre-le-signal" aria-label="Anchor link for: comprendre-le-signal">§</a>
+</h2>
+
+  <figure >
+    <a href="./img/donnee.BMP" target="_blank">
+    <img src="./img/donnee.BMP" style="width: 75%;" />
+    </a>
+    
+      <figcaption >1er octect du header -- 1V&#x2F;div - 500µs&#x2F;div</figcaption>
+    
+  </figure>
+
+<p>Le signal semble être composé d'état bas toujours de même durée (~ 400µs) et d'état haut de durée variable (soit ~ 400µs, soit ~ 1300µs), en plus du <em>bit de start</em> observé précédemment. C'est donc en modifiant la durée de l'état haut, que la télécommande peut envoyer des données au format binaires.</p>
+<blockquote>
+<p>Dans ce cas-là, c'est quoi un '1' c'est quoi un '0' ?</p>
+<div class="author">Un inconnu à l'air cynique</div>
+</blockquote>
+<p>Ben... on ne sait pas justement, alors on va se baser sur ce qui se fait déjà. En cherchant un peu sur internet, il semble ressortir plus souvent qu'un temps sans transmission &quot;court&quot; est un '0' logique et un signal &quot;long&quot; est un '1' logique. Ainsi l'image ci-dessus montre l'émission de 8 bits <code>01000000</code>.</p>
+<p>Pour être un peu plus précis, il semblerait que les données soit transmises en &quot;LSB-first&quot;, c'est-à-dire que le premier bit reçu, est le bit de poids faible (et le dernier celui de poids fort), donc l'octet transmit ci-dessus est : <code>00000010</code>.</p>
+<h2 id="decoder-le-signal">Décoder le signal<a class="zola-anchor" href="#decoder-le-signal" aria-label="Anchor link for: decoder-le-signal">§</a>
+</h2>
+<p>Chouette ! On sait comment lire le signal, mais il faudrait maintenant le &quot;capturer&quot; et le décoder (comprendre le rôle de chaque bit). Or comme dit plus haut je n'ai (toujours) pas d'analyseur logique et, comme je ne compte pas investir dans les prochains jours, on va faire avec ce que j'ai sous la main.</p>
+<p>Oh ! Un ESP8266 que j'avais prévu d'utiliser pour ce projet (ce sera la partie 2 😉) ! Voici le schéma de montage:</p>
+
+  <figure >
+    <a href="./img/schema_montage.png" target="_blank">
+    <img src="./img/schema_montage.png" style="width: 75%;" />
+    </a>
+    
+      <figcaption >Schéma de montage de l&#x27;ESP (NodeMCU) et du recepteur IR</figcaption>
+    
+  </figure>
+
+<p>Comme on l'a vu précédemment, l'état bas dure 400µs, ce qui est très court, même pour notre ESP. On va donc découper le programme en deux temps :</p>
+<ol>
+<li>Écoute et enregistrement des temps de chaque impulsions (via l'usage des interruptions<sup class="footnote-reference"><a href="#2">2</a></sup>)</li>
+<li>Analyse de la trame enregistrée et affichage au format binaire (plus simple pour décoder, vous allez voir pourquoi 😉)</li>
+</ol>
+<p>On ouvre VSCode et on crée un nouveau projet <a rel="noopener" target="_blank" href="https://platformio.org/">PlatformIO</a></p>
+<h3 id="ecoute-enregistrement">Ecoute &amp; Enregistrement<a class="zola-anchor" href="#ecoute-enregistrement" aria-label="Anchor link for: ecoute-enregistrement">§</a>
+</h3>
+<pre data-lang="c++" style="background-color:#191919;color:#ffffff;" class="language-c++ "><code class="language-c++" data-lang="c++"><span style="color:#80d500;">#include </span><span style="color:#ffd700;">&lt;Arduino.h&gt;
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">constexpr </span><span style="color:#8aa6c1;">uint16_t</span><span style="color:#cccccc;"> RAW_BUFFER_SIZE </span><span>= </span><span style="color:#eddd5a;">1024</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> last </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> raw[RAW_BUFFER_SIZE] </span><span>= </span><span style="color:#cccccc;">{</span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">};
+</span><span style="color:#80d500;">unsigned</span><span style="color:#cccccc;"> raw_idx </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">void</span><span style="color:#cccccc;"> IRAM_ATTR </span><span>isr</span><span style="color:#cccccc;">(){
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> now </span><span>= </span><span style="color:#cccccc;">micros();
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">if</span><span style="color:#cccccc;">( last </span><span>&gt; </span><span style="color:#eddd5a;">0 </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">        raw[raw_idx</span><span>++</span><span style="color:#cccccc;">] </span><span>=</span><span style="color:#cccccc;"> now </span><span>-</span><span style="color:#cccccc;"> last;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    last </span><span>=</span><span style="color:#cccccc;"> now;
+</span><span style="color:#cccccc;">}
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">void </span><span>setup</span><span style="color:#cccccc;">(){
+</span><span style="color:#cccccc;">  Serial.begin(</span><span style="color:#eddd5a;">115200</span><span style="color:#cccccc;">);
+</span><span style="color:#cccccc;">  attachInterrupt(digitalPinToInterrupt(D6), isr, CHANGE);
+</span><span style="color:#cccccc;">  </span><span>*</span><span style="color:#cccccc;">((</span><span style="color:#80d500;">volatile </span><span style="color:#8aa6c1;">uint32_t</span><span>*</span><span style="color:#cccccc;">) </span><span style="color:#eddd5a;">0x60000900</span><span style="color:#cccccc;">) </span><span>&amp;= ~</span><span style="color:#cccccc;">(</span><span style="color:#eddd5a;">1</span><span style="color:#cccccc;">); </span><span style="background-color:#171717;color:#616161;">// Hardware WDT OFF
+</span><span style="color:#cccccc;">}
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">void </span><span>loop</span><span style="color:#cccccc;">(){
+</span><span style="color:#cccccc;">}
+</span></code></pre>
+<p>Bon rien de bien compliqué mais on va reprendre le code pour être sûr de comprendre.</p>
+<pre data-lang="c++" style="background-color:#191919;color:#ffffff;" class="language-c++ "><code class="language-c++" data-lang="c++"><span style="color:#80d500;">#include </span><span style="color:#ffd700;">&lt;Arduino.h&gt;
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">constexpr </span><span style="color:#8aa6c1;">uint16_t</span><span style="color:#cccccc;"> RAW_BUFFER_SIZE </span><span>= </span><span style="color:#eddd5a;">1024</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> last </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> raw[RAW_BUFFER_SIZE] </span><span>= </span><span style="color:#cccccc;">{</span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">};
+</span><span style="color:#80d500;">unsigned</span><span style="color:#cccccc;"> raw_idx </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span></code></pre>
+<p>Dans un premier temps on inclut <code>Arduino.h</code>, on est dans PlatformIO donc c'est normal. On déclare un constante <code>RAW_BUFFER_SIZE</code> qui représente la taille de notre tableau qui enregistrera les temps entre chaque impulsion (1024 est probablement overkill, mais bon je préfère être large 😅). Pour finir on déclare et initialise deux variables, <code>raw_idx</code> qui est le prochain indice du tableau dans lequel placer notre mesure et <code>raw</code> le tableau dans lequel nous allons stocker nos mesures.</p>
+<pre data-lang="c++" style="background-color:#191919;color:#ffffff;" class="language-c++ "><code class="language-c++" data-lang="c++"><span style="color:#80d500;">void</span><span style="color:#cccccc;"> IRAM_ATTR </span><span>isr</span><span style="color:#cccccc;">(){
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> now </span><span>= </span><span style="color:#cccccc;">micros();
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">if</span><span style="color:#cccccc;">( last </span><span>&gt; </span><span style="color:#eddd5a;">0 </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">        raw[raw_idx</span><span>++</span><span style="color:#cccccc;">] </span><span>=</span><span style="color:#cccccc;"> now </span><span>-</span><span style="color:#cccccc;"> last;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    last </span><span>=</span><span style="color:#cccccc;"> now;
+</span><span style="color:#cccccc;">}
+</span><span style="color:#cccccc;">
+</span><span style="background-color:#171717;color:#616161;">// ...
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">void </span><span>loop</span><span style="color:#cccccc;">() {
+</span><span style="color:#cccccc;">}
+</span></code></pre>
+<p>Écartons ensuite les deux fonctions les plus simples. <code>isr()</code> sera la fonction appelée lors de l'interruption, elle mesure via <a rel="noopener" target="_blank" href="https://www.arduino.cc/reference/en/language/functions/time/micros/"><code>micros()</code></a><sup class="footnote-reference"><a href="#3">3</a></sup> le temps qu'a durée l'état (haut ou bas), puis place le résultat dans le tableau et termine en incrémentant <code>raw_idx</code> de 1. La condition <code>if( last &gt; 0 )</code> vérifie s'il s'agit de la première mesure.<br />
+Quant à <a rel="noopener" target="_blank" href="https://www.arduino.cc/reference/en/language/structure/sketch/loop/"><code>loop</code></a> (qui est la fonction appelée perpétuellement par Arduino), elle ne fait rien...</p>
+<div class="encart">
+    <div class="icon">
+      
+        ℹ️
+        
+      
+    </div>
+    <div class="content"><p>Pour ceux qui se demandent: &quot;pourquoi ne pas utiliser <code>digitalRead(...)</code> dans <code>loop()</code> plutôt que les interruptions ?&quot;<br />
+La raison est simple, cette fonction est très longue à s'exécuter, si à cela on ajoute le temps de la comparaison (du <code>if(...)</code>) puis le temps d'enregistrement des données, on pourrait &quot;rater&quot; certaines impulsions. <em>De plus, je trouve le code, avec l'interruption, plus court et plus lisible.</em></p>
+</div>
+</div><pre data-lang="c++" style="background-color:#191919;color:#ffffff;" class="language-c++ "><code class="language-c++" data-lang="c++"><span style="color:#80d500;">void </span><span>setup</span><span style="color:#cccccc;">(){
+</span><span style="color:#cccccc;">  Serial.begin(</span><span style="color:#eddd5a;">115200</span><span style="color:#cccccc;">);
+</span><span style="color:#cccccc;">  attachInterrupt(digitalPinToInterrupt(D6), isr, CHANGE);
+</span><span style="color:#cccccc;">  </span><span>*</span><span style="color:#cccccc;">((</span><span style="color:#80d500;">volatile </span><span style="color:#8aa6c1;">uint32_t</span><span>*</span><span style="color:#cccccc;">) </span><span style="color:#eddd5a;">0x60000900</span><span style="color:#cccccc;">) </span><span>&amp;= ~</span><span style="color:#cccccc;">(</span><span style="color:#eddd5a;">1</span><span style="color:#cccccc;">); </span><span style="background-color:#171717;color:#616161;">// Hardware WDT OFF
+</span><span style="color:#cccccc;">}
+</span></code></pre>
+<p>On termine avec le plus important ~la bouffe~, la fonction <code>setup()</code>. Une fois encore rien de difficile, on initialise la liaison série, pour avoir un retour de ce qui se passe. Les deux lignes suivantes sont bien plus intéressantes. <a rel="noopener" target="_blank" href="https://www.arduino.cc/reference/en/language/functions/external-interrupts/attachinterrupt/"><code>attachInterrupt</code></a> nous permet d'attacher une interruption sur une <strong>pin</strong>. Dans le cas présent on veut appeler la fonction <code>isr()</code> lorsque la pin change d'état (de haut vers bas, ou bas vers haut). Ou dit plus simplement, sur un <strong>front</strong> (<em>montant</em> ou <em>descendant</em>).<br />
+L'étrange instruction <code>*((volatile uint32_t*) 0x60000900) &amp;= ~(1);</code> permet d'écrire directement dans un registre de l'ESP pour désactiver le <a rel="noopener" target="_blank" href="https://fr.wikipedia.org/wiki/Chien_de_garde_(informatique)">&quot;watchdog&quot;</a>. <em>Je ne vais pas entrer dans les détails, mais la fonction <code>wdt_disable()</code> ne marche pas (je ne sais pas pourquoi et je m'en fous un peu pour le moment 🙃).</em></p>
+<h3 id="analyse-affichage">Analyse &amp; Affichage<a class="zola-anchor" href="#analyse-affichage" aria-label="Anchor link for: analyse-affichage">§</a>
+</h3>
+<p>Maintenant que l'ESP est capable d'enregistrer l'information dont nous avons besoin, il est temps de faire l'analyse et de l'afficher sur le port série. Pour cela on va simplement modifier un peu notre fonction <code>loop</code> et ajouter deux nouvelles fonctions.</p>
+<pre data-lang="c++" style="background-color:#191919;color:#ffffff;" class="language-c++ "><code class="language-c++" data-lang="c++"><span style="background-color:#171717;color:#616161;">// ...
+</span><span style="background-color:#171717;color:#616161;">// Déclaration &amp; initialisation des variables/constantes et de la function isr()
+</span><span style="background-color:#171717;color:#616161;">//...
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">void </span><span>print_binary</span><span style="color:#cccccc;">(</span><span style="color:#8aa6c1;">uint8_t </span><span style="font-style:italic;color:#8aa6c1;">byte</span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">  </span><span style="color:#80d500;">for</span><span style="color:#cccccc;">(</span><span style="color:#8aa6c1;">int8_t</span><span style="color:#cccccc;"> i </span><span>= </span><span style="color:#eddd5a;">7</span><span style="color:#cccccc;">; i </span><span>&gt;= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">; </span><span>--</span><span style="color:#cccccc;">i){
+</span><span style="color:#cccccc;">    Serial.print( (byte </span><span>&amp; </span><span style="color:#cccccc;">(</span><span style="color:#eddd5a;">0x01 </span><span>&lt;&lt;</span><span style="color:#cccccc;"> i)) </span><span>&gt; </span><span style="color:#eddd5a;">0 </span><span>? </span><span style="color:#ffd700;">&quot;1&quot; </span><span>: </span><span style="color:#ffd700;">&quot;0&quot; </span><span style="color:#cccccc;">);
+</span><span style="color:#cccccc;">  }
+</span><span style="color:#cccccc;">}
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">void </span><span>analyse_data</span><span style="color:#cccccc;">(){
+</span><span style="color:#cccccc;">  </span><span style="color:#8aa6c1;">uint8_t</span><span style="color:#cccccc;"> octets[</span><span style="color:#eddd5a;">27</span><span style="color:#cccccc;">] </span><span>= </span><span style="color:#cccccc;">{</span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">};
+</span><span style="color:#cccccc;">  </span><span style="color:#8aa6c1;">uint8_t</span><span style="color:#cccccc;"> id_bit </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">  </span><span style="color:#8aa6c1;">uint8_t</span><span style="color:#cccccc;"> id_octet </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">  </span><span style="background-color:#171717;color:#616161;">// On saute les deux première mesure (bit de start)
+</span><span style="color:#cccccc;">  </span><span style="color:#80d500;">for</span><span style="color:#cccccc;">( </span><span style="color:#80d500;">unsigned</span><span style="color:#cccccc;"> i </span><span>= </span><span style="color:#eddd5a;">2</span><span style="color:#cccccc;">; i </span><span>&lt;</span><span style="color:#cccccc;"> RAW_BUFFER_SIZE; i </span><span>+= </span><span style="color:#eddd5a;">2</span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> low </span><span>=</span><span style="color:#cccccc;"> raw[i];
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> high </span><span>=</span><span style="color:#cccccc;"> raw[i</span><span>+</span><span style="color:#eddd5a;">1</span><span style="color:#cccccc;">];
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">if</span><span style="color:#cccccc;">( low </span><span>== </span><span style="color:#eddd5a;">0 </span><span>||</span><span style="color:#cccccc;"> high </span><span>== </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">      </span><span style="color:#80d500;">break</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">else if</span><span style="color:#cccccc;">(high </span><span>&gt; </span><span style="color:#eddd5a;">3000</span><span style="color:#cccccc;">) {
+</span><span style="color:#cccccc;">      </span><span style="background-color:#171717;color:#616161;">// Fin du header
+</span><span style="color:#cccccc;">      </span><span style="background-color:#171717;color:#616161;">// Saut des deux prochaines données (bit de start)
+</span><span style="color:#cccccc;">      i </span><span>+= </span><span style="color:#eddd5a;">2</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">else if</span><span style="color:#cccccc;">( high </span><span>&gt; </span><span style="color:#eddd5a;">1000 </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">      </span><span style="background-color:#171717;color:#616161;">// bit &#39;1&#39;
+</span><span style="color:#cccccc;">      octets[id_octet] </span><span>|= </span><span style="color:#eddd5a;">1 </span><span>&lt;&lt;</span><span style="color:#cccccc;"> id_bit;
+</span><span style="color:#cccccc;">      id_bit</span><span>++</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">else if</span><span style="color:#cccccc;">( high </span><span>&lt; </span><span style="color:#eddd5a;">600 </span><span style="color:#cccccc;">) {
+</span><span style="color:#cccccc;">      </span><span style="background-color:#171717;color:#616161;">// bit &#39;0&#39;
+</span><span style="color:#cccccc;">      id_bit</span><span>++</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">else</span><span style="color:#cccccc;">{
+</span><span style="color:#cccccc;">      Serial.printf(</span><span style="color:#ffd700;">&quot;Erreure de trame position </span><span style="color:#66ccff;">%d</span><span style="color:#ffd700;">, (L: </span><span style="color:#66ccff;">%lu</span><span style="color:#ffd700;">, H: </span><span style="color:#66ccff;">%lu</span><span style="color:#ffd700;">)</span><span style="font-weight:bold;color:#ff2837;">\r\n</span><span style="color:#ffd700;">&quot;</span><span style="color:#cccccc;">, i, low, high);
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">if</span><span style="color:#cccccc;">( id_bit </span><span>&gt;= </span><span style="color:#eddd5a;">8 </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">      id_bit </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">      id_octet</span><span>++</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">  }
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">  </span><span style="color:#80d500;">for</span><span style="color:#cccccc;">(</span><span style="color:#8aa6c1;">uint8_t</span><span style="color:#cccccc;"> i </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">; i </span><span>&lt; </span><span style="color:#eddd5a;">27</span><span style="color:#cccccc;">; i</span><span>++ </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">    print_binary(octets[i]);
+</span><span style="color:#cccccc;">    Serial.print(</span><span style="color:#ffd700;">&quot; &quot;</span><span style="color:#cccccc;">);
+</span><span style="color:#cccccc;">  }
+</span><span style="color:#cccccc;">  Serial.println(</span><span style="color:#ffd700;">&quot;&quot;</span><span style="color:#cccccc;">);
+</span><span style="color:#cccccc;">}
+</span><span style="color:#cccccc;">
+</span><span style="background-color:#171717;color:#616161;">// ...
+</span><span style="background-color:#171717;color:#616161;">// Fonction setup
+</span><span style="background-color:#171717;color:#616161;">// ...
+</span><span style="color:#cccccc;">
+</span><span style="color:#80d500;">void </span><span>loop</span><span style="color:#cccccc;">(){
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">if</span><span style="color:#cccccc;">( Serial.available() </span><span>&gt; </span><span style="color:#eddd5a;">0 </span><span>&amp;&amp;</span><span style="color:#cccccc;"> Serial.read() </span><span>== </span><span style="color:#ffd700;">&#39;p&#39; </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">        analyse_data();
+</span><span style="color:#cccccc;">        raw_idx </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">        last </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">        </span><span style="color:#80d500;">for</span><span style="color:#cccccc;">( </span><span style="color:#80d500;">unsigned</span><span style="color:#cccccc;"> i </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">; i </span><span>&lt;</span><span style="color:#cccccc;"> RAW_BUFFER_SIZE; </span><span>++</span><span style="color:#cccccc;">i){
+</span><span style="color:#cccccc;">          raw[i] </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">        }
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">}
+</span></code></pre>
+<p>Cette fois encore on va reprendre le code par morceaux.</p>
+<pre data-lang="c++" style="background-color:#191919;color:#ffffff;" class="language-c++ "><code class="language-c++" data-lang="c++"><span style="color:#80d500;">void </span><span>print_binary</span><span style="color:#cccccc;">(</span><span style="color:#8aa6c1;">uint8_t </span><span style="font-style:italic;color:#8aa6c1;">byte</span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">  </span><span style="color:#80d500;">for</span><span style="color:#cccccc;">(</span><span style="color:#8aa6c1;">int8_t</span><span style="color:#cccccc;"> i </span><span>= </span><span style="color:#eddd5a;">7</span><span style="color:#cccccc;">; i </span><span>&gt;= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">; </span><span>--</span><span style="color:#cccccc;">i){
+</span><span style="color:#cccccc;">    Serial.print( (byte </span><span>&amp; </span><span style="color:#cccccc;">(</span><span style="color:#eddd5a;">0x01 </span><span>&lt;&lt;</span><span style="color:#cccccc;"> i)) </span><span>&gt; </span><span style="color:#eddd5a;">0 </span><span>? </span><span style="color:#ffd700;">&quot;1&quot; </span><span>: </span><span style="color:#ffd700;">&quot;0&quot; </span><span style="color:#cccccc;">);
+</span><span style="color:#cccccc;">  }
+</span><span style="color:#cccccc;">}
+</span></code></pre>
+<p><code>print_binary()</code> permet d'afficher la représentaion binaire de l'argument de la fonction (un entier non-signé sur 8 bits).</p>
+<pre data-lang="c++" style="background-color:#191919;color:#ffffff;" class="language-c++ "><code class="language-c++" data-lang="c++"><span style="color:#80d500;">void </span><span>analyse_data</span><span style="color:#cccccc;">(){
+</span><span style="color:#cccccc;">  </span><span style="color:#8aa6c1;">uint8_t</span><span style="color:#cccccc;"> octets[</span><span style="color:#eddd5a;">27</span><span style="color:#cccccc;">] </span><span>= </span><span style="color:#cccccc;">{</span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">};
+</span><span style="color:#cccccc;">  </span><span style="color:#8aa6c1;">uint8_t</span><span style="color:#cccccc;"> id_bit </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">  </span><span style="color:#8aa6c1;">uint8_t</span><span style="color:#cccccc;"> id_octet </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">  </span><span style="background-color:#171717;color:#616161;">// On saute les deux première mesure (bit de start)
+</span><span style="color:#cccccc;">  </span><span style="color:#80d500;">for</span><span style="color:#cccccc;">( </span><span style="color:#80d500;">unsigned</span><span style="color:#cccccc;"> i </span><span>= </span><span style="color:#eddd5a;">2</span><span style="color:#cccccc;">; i </span><span>&lt;</span><span style="color:#cccccc;"> RAW_BUFFER_SIZE; i </span><span>+= </span><span style="color:#eddd5a;">2</span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> low </span><span>=</span><span style="color:#cccccc;"> raw[i];
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">unsigned long</span><span style="color:#cccccc;"> high </span><span>=</span><span style="color:#cccccc;"> raw[i</span><span>+</span><span style="color:#eddd5a;">1</span><span style="color:#cccccc;">];
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">if</span><span style="color:#cccccc;">( low </span><span>== </span><span style="color:#eddd5a;">0 </span><span>||</span><span style="color:#cccccc;"> high </span><span>== </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">      </span><span style="color:#80d500;">break</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">else if</span><span style="color:#cccccc;">(high </span><span>&gt; </span><span style="color:#eddd5a;">3000</span><span style="color:#cccccc;">) {
+</span><span style="color:#cccccc;">      </span><span style="background-color:#171717;color:#616161;">// Fin du header
+</span><span style="color:#cccccc;">      </span><span style="background-color:#171717;color:#616161;">// Saut des deux prochaines données (bit de start)
+</span><span style="color:#cccccc;">      i </span><span>+= </span><span style="color:#eddd5a;">2</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">else if</span><span style="color:#cccccc;">( high </span><span>&gt; </span><span style="color:#eddd5a;">1000 </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">      </span><span style="background-color:#171717;color:#616161;">// bit &#39;1&#39;
+</span><span style="color:#cccccc;">      octets[id_octet] </span><span>|= </span><span style="color:#eddd5a;">1 </span><span>&lt;&lt;</span><span style="color:#cccccc;"> id_bit;
+</span><span style="color:#cccccc;">      id_bit</span><span>++</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">else if</span><span style="color:#cccccc;">( high </span><span>&lt; </span><span style="color:#eddd5a;">600 </span><span style="color:#cccccc;">) {
+</span><span style="color:#cccccc;">      </span><span style="background-color:#171717;color:#616161;">// bit &#39;0&#39;
+</span><span style="color:#cccccc;">      id_bit</span><span>++</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">else</span><span style="color:#cccccc;">{
+</span><span style="color:#cccccc;">      Serial.printf(</span><span style="color:#ffd700;">&quot;Erreure de trame position </span><span style="color:#66ccff;">%d</span><span style="color:#ffd700;">, (L: </span><span style="color:#66ccff;">%lu</span><span style="color:#ffd700;">, H: </span><span style="color:#66ccff;">%lu</span><span style="color:#ffd700;">)</span><span style="font-weight:bold;color:#ff2837;">\r\n</span><span style="color:#ffd700;">&quot;</span><span style="color:#cccccc;">, i, low, high);
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">if</span><span style="color:#cccccc;">( id_bit </span><span>&gt;= </span><span style="color:#eddd5a;">8 </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">      id_bit </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">      id_octet</span><span>++</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">  }
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">  </span><span style="color:#80d500;">for</span><span style="color:#cccccc;">(</span><span style="color:#8aa6c1;">uint8_t</span><span style="color:#cccccc;"> i </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">; i </span><span>&lt; </span><span style="color:#eddd5a;">27</span><span style="color:#cccccc;">; i</span><span>++ </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">    print_binary(octets[i]);
+</span><span style="color:#cccccc;">    Serial.print(</span><span style="color:#ffd700;">&quot; &quot;</span><span style="color:#cccccc;">);
+</span><span style="color:#cccccc;">  }
+</span><span style="color:#cccccc;">  Serial.println(</span><span style="color:#ffd700;">&quot;&quot;</span><span style="color:#cccccc;">);
+</span><span style="color:#cccccc;">}
+</span></code></pre>
+<p>Voici le plus important, <code>analyse_data()</code> comme son nom l'indique.... analyse les données...<br />
+La fonction commence avec quelques variables :</p>
+<ul>
+<li><code>octets[27]</code> : Contient les données finales (il est initialisé avec toutes ses valeurs à 0)</li>
+<li><code>id_bit</code> : Position du prochain bit à écrire</li>
+<li><code>id_octet</code> : Position de l'octet en cours d'écriture</li>
+</ul>
+<p>Ensuite, le corps de la fonction : une boucle <code>for</code> qui va itérer sur toutes les mesures. Puisque les bits sont définis par deux impulsions (basse et haute), on récupère les deux à chaque fois. Les deux premières mesures peuvent être sautées, puisque c'est le <em>bit de start</em>. On commence par stocker, temporairement, les deux temps dans les variables <code>low</code> et <code>high</code>, puis on s'en sert pour identifier quelle information ils représentent :</p>
+<ol>
+<li>Une des deux données à pour valeur <code>0</code>, cela signifie qu'il n'y a plus rien à traiter, on sort de la boucle.</li>
+<li>La valeur <code>high</code> est supérieure à 3000, c'est la fin du header, on ignore donc ces valeurs plus les deux suivantes du <em>bit de start</em>.</li>
+<li>La valeur <code>high</code> est supérieure à 1000 (mais inférieur a 3000), c'est un bit de valeur <code>1</code>. On l'enregistre et on incrémente le compteur <code>id_bit</code>.</li>
+<li>la valeur de <code>high</code> est inférieure à 600, c'est un bit de valeur <code>0</code>. Le bit en cours vaut dejà 0, on incrémente le compteur <code>id_bit</code></li>
+<li>Si aucun des cas suivant n'est le bon, alors on considère que c'est une erreur est on l'affiche.</li>
+</ol>
+<div class="encart">
+    <div class="icon">
+      
+        ℹ️
+        
+      
+    </div>
+    <div class="content"><p>Les règles de détection (condition <code>if</code>) sont très naïves, mais le but ici n'est pas de recréer un récepteur IR fiable, mais simplement comprendre les trames.</p>
+</div>
+</div><pre data-lang="rust" style="background-color:#191919;color:#ffffff;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#cccccc;">void </span><span style="color:#80d500;">loop</span><span style="color:#cccccc;">(){
+</span><span style="color:#cccccc;">    </span><span style="color:#80d500;">if</span><span style="color:#cccccc;">( Serial.</span><span style="color:#8aa6c1;">available</span><span style="color:#cccccc;">() </span><span>&gt; </span><span style="color:#eddd5a;">0 </span><span>&amp;&amp;</span><span style="color:#cccccc;"> Serial.</span><span style="color:#8aa6c1;">read</span><span style="color:#cccccc;">() </span><span>== </span><span style="color:#ffd700;">&#39;p&#39; </span><span style="color:#cccccc;">){
+</span><span style="color:#cccccc;">        </span><span style="color:#8aa6c1;">analyse_data</span><span style="color:#cccccc;">();
+</span><span style="color:#cccccc;">        raw_idx </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">        last </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">
+</span><span style="color:#cccccc;">        </span><span style="color:#80d500;">for</span><span style="color:#cccccc;">( unsigned i </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">; i </span><span>&lt; </span><span style="color:#66ccff;">RAW_BUFFER_SIZE</span><span style="color:#cccccc;">; </span><span>++</span><span style="color:#cccccc;">i){
+</span><span style="color:#cccccc;">          raw[i] </span><span>= </span><span style="color:#eddd5a;">0</span><span style="color:#cccccc;">;
+</span><span style="color:#cccccc;">        }
+</span><span style="color:#cccccc;">    }
+</span><span style="color:#cccccc;">}
+</span></code></pre>
+<p>Pour terminer, on modifie la fonction <code>loop</code> pour y appeler notre fonction d'analyse en envoyant la lettre <code>p</code> (minuscule) sur le port série. Une fois l'analyse faites on se prépare pour une nouvelle.</p>
+<p><em>Si vous voulez un exemple de ce que donnent les valeurs &quot;brut&quot; (avant analyse), <a href="https://jnthbdn.github.io/hack-clim-part1/./exemple_raw_data.txt">c'est par ici 📄</a></em></p>
+<p>Pfiouuu... Voilà une bonne chose de faite <em>*craquements de dos*</em> ! Il est temps de regarder ce que ça donne !</p>
+<h2 id="comprendre-le-signal-1">Comprendre le signal<a class="zola-anchor" href="#comprendre-le-signal-1" aria-label="Anchor link for: comprendre-le-signal-1">§</a>
+</h2>
+<blockquote>
+<p>00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110010 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 11100111</p>
+</blockquote>
+<p>Notre première mesure ! Top... mais qu'est ce qu'on en fait ?!
+Ben... comme ça, pas grand chose, enfin si. On sait, d'après notre télécommande, que ce signal veut dire :</p>
+<ul>
+<li>État: Marche</li>
+<li>Température: 25.0°C</li>
+<li>Mode de ventilation: AUTO</li>
+<li><em>Tout le reste en mode 'AUTO' (ou du moins les valeurs par défaut, car j'ai réinitialisé la télécommande)</em></li>
+</ul>
+<h3 id="la-temperature">La Température<a class="zola-anchor" href="#la-temperature" aria-label="Anchor link for: la-temperature">§</a>
+</h3>
+<p>Maintenant pour savoir quel bit représente quoi... il nous faut comparer. Je vais augmenter la température &quot;d'un cran&quot; soit 0.5°C.</p>
+<blockquote>
+<p>00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 0011001<span class="diff">1</span> 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 1110<span class="diff">1000</span></p>
+<div class="author">État : On - Temperature : 25.5°C - Mode de ventilation : AUTO <br/><i class="tiny">En rouge les différences avec la trame précédente</i></div>
+</blockquote>
+<p>Visiblement il y a plusieurs modifications :</p>
+<ul>
+<li>Le bit 1 de l'octet 15</li>
+<li>Les bits 4 à 1 de l'octet 27</li>
+</ul>
+<p>Ignorons pour le moment l'octet 27, et regardons un peu plus près le 15e: <code>00110011</code>.<br />
+Vous le voyez ? Non... attendez je vais le mettre en plus gros $ \large{00110011} $...<br />
+Toujours pas !? Ok... $\small{0}\large{11001}\small{10}$.<br />
+Et oui : 25 en binaire !</p>
+<p>Si notre hypothèse est juste les bits 6 à 2 sont la valeur entière de la température et le bit 1 représente le &quot;demi&quot;. Pour vérifier on va encore monter la température de 0.5°C (soit 26.0°C) nous devrions voir <code>11010</code> (26 en binaire) pour la partie entière et <code>0</code> pour le demi.</p>
+<blockquote>
+<p>00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110<span class="diff">100</span> 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 1110100<span class="diff">1</span></p>
+<div class="author">État : On - Temperature : 26.0°C - Mode de ventilation : AUTO <br/><i class="tiny">En rouge les différences avec la trame précédente</i></div>
+</blockquote>
+<p>🎉 Parfait !</p>
+<h3 id="le-checksum">Le checksum<a class="zola-anchor" href="#le-checksum" aria-label="Anchor link for: le-checksum">§</a>
+</h3>
+<p>Maintenant il reste à comprendre ce qu'est le 27e octet qui change tout le temps... <em>tout le temps</em>...  <em>tout le temps</em>... ... ...  UN <a rel="noopener" target="_blank" href="https://fr.wikipedia.org/wiki/Somme_de_contr%C3%B4le">CHECKSUM</a> !</p>
+<p>En effet, le climatiseur doit pouvoir vérifier si la trame qu'il a reçue est correcte et pour cela le plus simple est d'utiliser un <em>checksum</em>. Comme son nom l'indique il s'agit d'une <em>somme</em>, mais comme il est codé sur un octet, la valeur finale sera le reste de la division par 256 ($ 2^8 $). Le <em>header</em> (qui ne change jamais) ne rentre pas dans le calcul, uniquement les octets du <em>body</em> son utilisés (et sauf le checksum, évidemment).
+$$ checksum = \left( \sum_{i=9}^{26} octet_i \right) \mod 256 $$ 
+En prenant comme example notre trame précédente :
+$$checksum = 11101001 = (233)_{10}\newline
+\ \newline
+00000010 + 00100000 + 11100000 + 00000100 + 00000000 + \newline
+00001001 + 00110100 + 10000000 + 10101111 + 00000000 + \newline
+00000000 + 00001110 + 11100000 + 00000000 + 00000000 + \newline
+10001001 + 00000000 +  00000000 + 11101001 = (1001)_{10} \newline
+\ \newline
+1001 \mod 256 = 233$$</p>
+<h3 id="marche-arret">Marche / Arret<a class="zola-anchor" href="#marche-arret" aria-label="Anchor link for: marche-arret">§</a>
+</h3>
+<p>Comme pour la température on va procéder exactement de la même manière. En partant de la trame précédente, je vais appuyer sur le bouton pour éteindre la climatisation.</p>
+<blockquote>
+<p>00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 0000100<span class="diff">0</span> 00110100 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 1110100<span class="diff">0</span></p>
+<div class="author">État: Off - Temperature: 26.0°C - Mode de ventilation: AUTO <br/><i class="tiny">En rouge les différences avec la trame précédente</i></div>
+</blockquote>
+<p>Bon... ben voilà... Visiblement l'état (on/off) de la clim est déterminé par 1 seul bit : Le bit 1 de l'octet 14.</p>
+<p>On passe à la suite !?</p>
+<h3 id="mode-de-ventilation">Mode de ventilation<a class="zola-anchor" href="#mode-de-ventilation" aria-label="Anchor link for: mode-de-ventilation">§</a>
+</h3>
+<p>Ma climatisation possède 3 modes de ventilation:</p>
+<ul>
+<li>Auto (par défaut)</li>
+<li>Powerfull</li>
+<li>Quiet</li>
+</ul>
+<p>Regardons les trois trames.</p>
+<blockquote>
+<p>00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110100 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 11101001</p>
+<div class="author">État: On - Température: 26.0°C - Mode de ventilation: AUTO</div>  
+<p>00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110100 10000000 10101111 00000000 00000000 00001110 11100000 0000000<span class="diff">1</span> 00000000 10001001 00000000 00000000 111010<span class="diff">10</span></p>
+<div class="author">État: On - Température: 26.0°C - Mode de ventilation: Powerfull <br/><i class="tiny">En rouge les différences avec la trame précédente</i></div>  
+<p>00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110100 10000000 10101111 00000000 00000000 00001110 11100000 00<span class="diff">1</span>0000<span class="diff">0</span> 00000000 10001001 00000000 00000000 <span class="diff">000</span>010<span class="diff">01</span></p>
+<div class="author">État: On - Température: 26.0°C - Mode de ventilation: Quiet <br/><i class="tiny">En rouge les différences avec la trame précédente</i></div>
+</blockquote>
+<p>Cela est surprenant, les modes (pourtant mutuellement exclusif) ne sont pas codés sur deux bits consécutifs. Le mode 'powerfull' est contrôlé par le bit 1 de l'octet 22 et le mode 'quiet' par le bit 6. (Je me demande ce qui se passe si c'est deux bits sont à 1 🤔).</p>
+<div class="encart">
+    <div class="icon">
+      
+        ℹ️
+        
+      
+    </div>
+    <div class="content"><p>Lors de l'arrêt, la télécommande envoie le mode AUTO, je ne sais pas vraiment pourquoi, mais il faudra le garder à l'esprit lors de l'écriture de notre télécommande.</p>
+</div>
+</div><h2 id="la-suite">La suite<a class="zola-anchor" href="#la-suite" aria-label="Anchor link for: la-suite">§</a>
+</h2>
+<p>Ce fut long (et encore, j'ai simplifier des trucs 😄), mais on y est arrivé. 
+On pourrait répertorier la fonction de chacun des bits de la trame (minuteurs, puissance de ventilation, orientation du flux d'air, ...), mais je n'ai pas besoin de plus pour ce projet. Si l'envie me prend je ferais un post.</p>
+<p>La prochaine étape est de contrôler cela à partir d'un ESP8266, embarquant un serveur web sur lequel HomeAssistant pourra envoyer des requêtes...
+Bref, tout un programme...</p>
+<p>Retrouver le projet PlatformIO, avec le code source sur github: <a rel="noopener" target="_blank" href="https://github.com/jnthbdn/ir_sniffer">https://github.com/jnthbdn/ir_sniffer</a></p>
+<p>On se retrouve pour la partie 2 !</p>
+<p class="right">Bidouillez-bien</p>
+<hr />
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>un rayonnement invisible pour l'humain, plutôt pratique pour communiqué sur de courte distance</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>Les interruptions permettent de stopper le programme en cours pour exécuter un autre morceau de code.</p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p><code>micros()</code> retourne le temps en <em>microsecondes</em> depuis le démarrage (ou dernier reset) de l'ESP.</p>
+</div>
+
+
+        
+    
+        
+
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+        *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+        *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+        
+        var disqus_config = function () {
+            this.page.url = 'https://jnthbdn.github.io/hack-clim-part1/';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = 'https://jnthbdn.github.io/hack-clim-part1/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://jnthbdn-github-io.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+    
+
+        
+        
+    </article></div>
+    <div class="pagination">
+        <div class="pagination__buttons">
+            </div>
+    </div>
+<footer class="footer">
+                    <div class="footer__inner"><div class="copyright copyright--user"><span>Powered by <a href="https://www.getzola.org/">Zola</a></span><span>:: Theme made by <a href="https://github.com/ejmg">ejmg</a></span></div>
+    <script type="text/javascript" src="https://jnthbdn.github.io/assets/js/main.js"></script>
+</div>
+                    
+<p class="center">Retrouvez ce blog sur <a href="https://github.com/jnthbdn/jnthbdn.github.io">GitHub</a></p>
+<script src="https://jnthbdn.github.io/elasticlunr.min.js"></script>
+<script src="https://jnthbdn.github.io/lunr.stemmer.support.js"></script>
+<script src="https://jnthbdn.github.io/lunr.fr.js"></script>
+<script src="https://jnthbdn.github.io/search_index.fr.js"></script>
+<script src="https://jnthbdn.github.io/search.js"></script>
+
+                </footer></div>
+    </body>
+</html>

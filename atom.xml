@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="fr">
+    <title>Mon dernier side project</title>
+    <subtitle>Un endroit où l&#x27;on pourra un jour trouver une réponse à ses questions</subtitle>
+    <link href="https://jnthbdn.github.io/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://jnthbdn.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-09-10T00:00:00+00:00</updated>
+    <id>https://jnthbdn.github.io/atom.xml</id>
+    <entry xml:lang="fr">
+        <title>Hack télécommande climatiseur (Part 2)</title>
+        <published>2023-09-10T00:00:00+00:00</published>
+        <updated>2023-09-10T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://jnthbdn.github.io/hack-clim-part2/" type="text/html"/>
+        <id>https://jnthbdn.github.io/hack-clim-part2/</id>
+        
+        <content type="html">&lt;h1 id=&quot;previously&quot;&gt;Previously&lt;a class=&quot;zola-anchor&quot; href=&quot;#previously&quot; aria-label=&quot;Anchor link for: previously&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;Dans &lt;a href=&quot;https:&#x2F;&#x2F;jnthbdn.github.io&#x2F;hack-clim-part1&#x2F;&quot;&gt;l&#x27;article précédent&lt;&#x2F;a&gt;, nous avons découvert et décoder le protocole infrarouge utilisé par la télécommande du climatiseur. Maintenant que l&#x27;on connaît les bits et les octets à modifier, il est temps de programmer notre ESP.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;la-porteuse-ca-vous-dit&quot;&gt;La porteuse... ça vous dit ?&lt;a class=&quot;zola-anchor&quot; href=&quot;#la-porteuse-ca-vous-dit&quot; aria-label=&quot;Anchor link for: la-porteuse-ca-vous-dit&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;Dans les oscillogrammes de l&#x27;article précédent, nous pouvions observer des signaux (haut ou bas) bien lisses. C&#x27;est extrêmement pratique pour comprendre ce qui se passe et décoder les informations qui transitent, mais je dois vous avouer que ce n&#x27;est pas la réalité ! (&lt;em&gt;*tan   tan   tan*&lt;&#x2F;em&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;Si l&#x27;on observe le signal produit par la LED on devrait obtenir quelque chose de beaucoup plus &amp;quot;haché&amp;quot;, on dit que le signal &lt;strong&gt;module la porteuse&lt;&#x2F;strong&gt;. Dans le cas de notre télécommande la porteuse est de 38kHz.&lt;&#x2F;p&gt;
+
+  &lt;figure &gt;
+    &lt;a href=&quot;.&#x2F;img&#x2F;bit.BMP&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;.&#x2F;img&#x2F;bit.BMP&quot; style=&quot;width: 75%;&quot; &#x2F;&gt;
+    &lt;&#x2F;a&gt;
+    
+      &lt;figcaption &gt;1 bit sur une porteuse de 32kHz -- 1V&amp;#x2F;div - 5ms&amp;#x2F;div&lt;&#x2F;figcaption&gt;
+    
+  &lt;&#x2F;figure&gt;
+
+&lt;div class=&quot;encart&quot;&gt;
+    &lt;div class=&quot;icon&quot;&gt;
+      
+         🐞
+        
+      
+    &lt;&#x2F;div&gt;
+    &lt;div class=&quot;content&quot;&gt;&lt;p&gt;Il y a une petite erreur sur l&#x27;image... Je me suis planté en plaçant le curseur, le $\Delta T$ ne vaut pas 28µs mais 26µs.
+$$
+\Delta T = \frac{1}{Freq_{porteuse}} = \frac{1}{38000} \approx 0.000026316 \Rightarrow 26.3µs
+$$&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;&#x2F;div&gt;&lt;h2 id=&quot;pourquoi-utiliser-une-porteuse-en-infrarouge&quot;&gt;Pourquoi utiliser une porteuse en Infrarouge ?&lt;a class=&quot;zola-anchor&quot; href=&quot;#pourquoi-utiliser-une-porteuse-en-infrarouge&quot; aria-label=&quot;Anchor link for: pourquoi-utiliser-une-porteuse-en-infrarouge&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;p&gt;Puisqu&#x27;il n&#x27;y a souvent qu&#x27;un seul &amp;quot;unité intérieure&amp;quot; de climatisation, il serait légitime de se demander pourquoi se compliquer en utilisant une porteuse, alors qu&#x27;un signal direct pourrait tout aussi bien marcher.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;cas-d-usage&quot;&gt;Cas d&#x27;usage&lt;a class=&quot;zola-anchor&quot; href=&quot;#cas-d-usage&quot; aria-label=&quot;Anchor link for: cas-d-usage&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;Il y a deux cas (principaux) dans lesquels on veut utiliser une porteuse :&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;La transmission par ondes électromagnétiques : En utilisant la porteuse comme onde &amp;quot;de transport&amp;quot;, les caractéristiques de transmission (distance, puissance, ...) seront celles de la porteuse. Cela permettra aussi &amp;quot;d&#x27;isoler&amp;quot; la fréquence que l&#x27;on souhaite recevoir (par exemple la radio, la fréquence de la station est en réalité la porteuse).&lt;&#x2F;li&gt;
+&lt;li&gt;La transmission de plusieurs informations via le même support physique : En utilisant plusieurs porteuses, on peut, sans perte et sans collision (normalement), transmettre plusieurs informations différentes en même temps (par exemple, pour les vieux, la télévision par câble. Un seul câble, mais plusieurs chaînes)&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Dit comme ça, l&#x27;utilité ne semble pas très claire... Pourtant, dans en infrarouge, plus précisément dans le contexte qui est le nôtre, c&#x27;est le cas n°1 qui nous intéresse.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;un-bain-de-lumiere&quot;&gt;Un bain de lumière&lt;a class=&quot;zola-anchor&quot; href=&quot;#un-bain-de-lumiere&quot; aria-label=&quot;Anchor link for: un-bain-de-lumiere&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;L&#x27;infrarouge, je ne vous apprends rien, est de la lumière. Pour aller un peu plus dans les détails, le spectre IR est très large, tellement large qu&#x27;on l&#x27;a découpé en trois &lt;strong&gt;régions&lt;&#x2F;strong&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; en fonction de leurs longueurs d&#x27;ondes :&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Infrarouge &lt;em&gt;proche&lt;&#x2F;em&gt; : de 0.78µm à 3µm&lt;&#x2F;li&gt;
+&lt;li&gt;Infrarouge &lt;em&gt;moyen&lt;&#x2F;em&gt; : de 3µm à 50µm&lt;&#x2F;li&gt;
+&lt;li&gt;Infrarouge &lt;em&gt;lointain&lt;&#x2F;em&gt; : de 50µm à 5mm 😳&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;div class=&quot;encart&quot;&gt;
+    &lt;div class=&quot;icon&quot;&gt;
+      
+        ℹ️
+        
+      
+    &lt;&#x2F;div&gt;
+    &lt;div class=&quot;content&quot;&gt;&lt;p&gt;Pour rappel, la lumière est une onde (&lt;em&gt;doucement les physiciens ! Je simplifie...&lt;&#x2F;em&gt;), et comme toutes les ondes, elles ont une &lt;strong&gt;fréquence&lt;&#x2F;strong&gt;. La fréquence est le &lt;strong&gt;nombre de fois&lt;&#x2F;strong&gt; qu&#x27;un signal se répète pendant &lt;em&gt;1 seconde&lt;&#x2F;em&gt; (100 Hz =&amp;gt; 100 répétitions par secondes). Mais on peut aussi exprimer la &lt;strong&gt;longueur d&#x27;onde&lt;&#x2F;strong&gt; qui est le &lt;strong&gt;temps&lt;&#x2F;strong&gt; entre deux répétitions. &lt;&#x2F;p&gt;
+&lt;p&gt;À mesure que la fréquence augmente, la longueur d&#x27;onde diminue.&lt;&#x2F;p&gt;
+
+  &lt;figure  class=&quot;center&quot;&gt;
+    &lt;a href=&quot;.&#x2F;img&#x2F;sine_waves_wiki.svg&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;.&#x2F;img&#x2F;sine_waves_wiki.svg&quot; style=&quot;width: 480px;&quot; &#x2F;&gt;
+    &lt;&#x2F;a&gt;
+    
+      &lt;figcaption &gt;Exemple d&amp;#x27;ondes du spectre visible (Rouge: 750nm, Orange: 620nm, Vert: 520nm, Bleu: 470nm, Violet: 380nm)&lt;&#x2F;figcaption&gt;
+    
+  &lt;&#x2F;figure&gt;
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Couleur&lt;&#x2F;th&gt;&lt;th&gt;Longueur d&#x27;Onde&lt;&#x2F;th&gt;&lt;th&gt;Fréquence&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;Rouge&lt;&#x2F;td&gt;&lt;td&gt;~ 750 nm&lt;&#x2F;td&gt;&lt;td&gt;~ 400 THz&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Orange&lt;&#x2F;td&gt;&lt;td&gt;~ 620 nm&lt;&#x2F;td&gt;&lt;td&gt;~ 480 THz&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Vert&lt;&#x2F;td&gt;&lt;td&gt;~ 520 nm&lt;&#x2F;td&gt;&lt;td&gt;~ 580 THz&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Bleu&lt;&#x2F;td&gt;&lt;td&gt;~ 470 nm&lt;&#x2F;td&gt;&lt;td&gt;~ 640 THz&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Violet&lt;&#x2F;td&gt;&lt;td&gt;~ 380 nm&lt;&#x2F;td&gt;&lt;td&gt;~ 790 THz&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;&#x2F;div&gt;
+&lt;&#x2F;div&gt;
+&lt;p&gt;Quasiment tout ce qui émet de la lumière, y compris le soleil, produit des infrarouges, en plus ou moins grande quantité. Lorsque notre signal est émis, il se trouve immergé dans un environnement rempli d&#x27;infrarouges. Le défi réside alors, pour le récepteur, dans la différenciation de notre signal par rapport au &lt;em&gt;bruit&lt;&#x2F;em&gt; ambiant.&lt;&#x2F;p&gt;
+&lt;p&gt;La méthode la plus simple consiste à appliquer une technique similaire à celle utilisée en émission radio, en utilisant une porteuse. Le récepteur peut ainsi distinguer les informations du signal parmi le bruit en cherchant une fréquence de 38 kHz. Cette fréquence de 38 kHz sert de référence pour séparer le &lt;em&gt;signal&lt;&#x2F;em&gt; d&#x27;intérêt du fond infrarouge, permettant ainsi au récepteur de reconnaître et de traiter correctement les données transmises.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;sortez-vos-esp-a-l-abordage-flag-black-skull-crossbones&quot;&gt;Sortez vos ESP ! A l&#x27;abordage ! 🏴‍☠️&lt;a class=&quot;zola-anchor&quot; href=&quot;#sortez-vos-esp-a-l-abordage-flag-black-skull-crossbones&quot; aria-label=&quot;Anchor link for: sortez-vos-esp-a-l-abordage-flag-black-skull-crossbones&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;h2 id=&quot;generer-la-porteuse&quot;&gt;Générer la porteuse&lt;a class=&quot;zola-anchor&quot; href=&quot;#generer-la-porteuse&quot; aria-label=&quot;Anchor link for: generer-la-porteuse&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;p&gt;Bien ! Commençons par le plus simple. La porteuse est donc un signal carré, de fréquence 38kHz (pour la 30e fois). On pourrait prendre un NE555 ❤️, deux résistances de 4 ohms et un condensateur de 4.8 µF... Oui ce sera bien... Mais je vous propose d&#x27;utiliser le &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;fr.wikipedia.org&#x2F;wiki&#x2F;Modulation_de_largeur_d%27impulsion&quot;&gt;PWM&lt;&#x2F;a&gt; de l&#x27;ESP, c&#x27;est plus simple est ça marche tout aussi bien...&lt;&#x2F;p&gt;
+&lt;p&gt;Le fonctionnement est très simple, on va régler la fréquence du PWM sur la valeur de notre porteuse et le &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;fr.wikipedia.org&#x2F;wiki&#x2F;Rapport_cyclique&quot;&gt;rapport cyclique&lt;&#x2F;a&gt; à 50%. En utilisant un transistor, on pourra &amp;quot;allumer&amp;quot; ou &amp;quot;éteindre&amp;quot; notre LED, sans nous soucier de la porteuse.&lt;&#x2F;p&gt;
+
+  &lt;figure &gt;
+    &lt;a href=&quot;.&#x2F;img&#x2F;schema.png&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;.&#x2F;img&#x2F;schema.png&quot; style=&quot;width: 75%;&quot; &#x2F;&gt;
+    &lt;&#x2F;a&gt;
+    
+      &lt;figcaption &gt;Schematique simplifié de la LED IR&lt;&#x2F;figcaption&gt;
+    
+  &lt;&#x2F;figure&gt;
+
+&lt;h2 id=&quot;si-on-codait&quot;&gt;Si on codait&lt;a class=&quot;zola-anchor&quot; href=&quot;#si-on-codait&quot; aria-label=&quot;Anchor link for: si-on-codait&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;p&gt;On ne va traiter &amp;quot;que&amp;quot; la partie télécommande. Le code permettant la connexion au WiFi, ou sa configuration ne vont pas être traités ici. De plus, le code étant assez long je ne vais pas le détailler en totalité, je vais juste m&#x27;attarder sur quelques points que je trouve important. Je vous invite à regarder le code, disponible sur GitHub: &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jnthbdn&#x2F;esp_clim_controller&#x2F;blob&#x2F;main&#x2F;src&#x2F;panasonic_remote.h&quot;&gt;https:&#x2F;&#x2F;github.com&#x2F;jnthbdn&#x2F;esp_clim_controller&#x2F;blob&#x2F;main&#x2F;src&#x2F;panasonic_remote.h&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;vous-reprendrez-bien-une-constante&quot;&gt;Vous reprendrez bien une constante ?&lt;a class=&quot;zola-anchor&quot; href=&quot;#vous-reprendrez-bien-une-constante&quot; aria-label=&quot;Anchor link for: vous-reprendrez-bien-une-constante&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;constexpr unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; STOP_BIT_LOW_TIME  &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;10000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;constexpr unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; START_BIT_HIGH_TIME &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;3500&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;constexpr unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; START_BIT_LOW_TIME  &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1700&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;constexpr unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; BIT_HIGH_TIME  &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;430&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;constexpr unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; BIT_LOW_0_TIME &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;440&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;constexpr unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; BIT_LOW_1_TIME &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1300&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;constexpr &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; PANASONIC_DATA_SIZE &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;27&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Depuis que &lt;code&gt;constexpr&lt;&#x2F;code&gt; existe, je ne sais pas comment j&#x27;ai fait pour m&#x27;en passer...(&lt;em&gt;sûrement avec des &lt;code&gt;#define&lt;&#x2F;code&gt;&lt;&#x2F;em&gt;...).&lt;br &#x2F;&gt;
+On déclare les temps de chacun des &amp;quot;bit&amp;quot; dont on va avoir besoin pour émettre un message. Notez que l&#x27;on pourrait se passer de &lt;code&gt;BIT_HIGH_TIME&lt;&#x2F;code&gt; puisqu&#x27;il est quasiment égal à &lt;code&gt;BIT_LOW_0_TIME&lt;&#x2F;code&gt;, mais je trouve que ça rend le code (qui arrive) plus lisible et on identifie plus facilement l&#x27;étape de transmission en cours.&lt;&#x2F;p&gt;
+&lt;p&gt;La dernière constante &lt;code&gt;PANASONIC_DATA_SIZE&lt;&#x2F;code&gt; nous servira pour les itérations, cela évite d&#x27;avoir des &amp;quot;magic number&amp;quot;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#2&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; qui se baladent dans le code.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;l-initialisation&quot;&gt;L&#x27;initialisation&lt;a class=&quot;zola-anchor&quot; href=&quot;#l-initialisation&quot; aria-label=&quot;Anchor link for: l-initialisation&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;PanasonicRemote(byte pin_pwm, byte pin_led) &lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;pin_pwm{pin_pwm}, pin_led{pin_led}, data{ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;new &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;[PANASONIC_DATA_SIZE] }{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Header
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000010&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00100000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b11100000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000100&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;6&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;7&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000110&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Body
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;8&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000010&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;9&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00100000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b11100000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;11&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000100&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;12&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;13&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00001000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;14&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00110010&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;15&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b10000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b10101111&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;17&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;18&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;29&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00001110&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;20&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b11100000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;21&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;22&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;23&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b10001001&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;24&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;25&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b00000000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;26&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b11100110&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;init&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    analogWriteRange(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1024&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    analogWriteFreq(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;38000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    pinMode(pin_pwm, OUTPUT);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    analogWrite(pin_pwm, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;512&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    pinMode(pin_led, OUTPUT);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    digitalWrite(pin_led, LOW);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Le gros &amp;quot;constructeur&amp;quot; ne fait pas grand chose à part initialiser nos variables. On remarque que les données de trames, par défaut, sont:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;État : OFF&lt;&#x2F;li&gt;
+&lt;li&gt;Température: 25.0°C&lt;&#x2F;li&gt;
+&lt;li&gt;Mode: AUTO&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Et voici &lt;code&gt;init&lt;&#x2F;code&gt;, la fonction qui met en place la porteuse. Pour ne pas avoir de mauvaise blague on se met d&#x27;accord sur le &amp;quot;range&amp;quot; (la plage) de valeurs utilisées pour définir le duty cycle du PWM avec &lt;code&gt;analogWriteRange&lt;&#x2F;code&gt;. Je prends &lt;code&gt;1024&lt;&#x2F;code&gt; pour deux raisons:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Par pure convention et parce que j&#x27;ai l&#x27;habitude.&lt;&#x2F;li&gt;
+&lt;li&gt;Potentiellement on peut vouloir utiliser le PWM ailleurs dans le projet, donc autant garder une plage de valeur correcte.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Il faut donc utiliser la valeur &lt;code&gt;512&lt;&#x2F;code&gt; pour mettre le duty cycle à 50% (et 0 pour le mettre à 0%, j&#x27;espère que vous suivez).&lt;&#x2F;p&gt;
+&lt;p&gt;Il nous reste à préciser la valeur de la fréquence avec &lt;code&gt;analogWriteFreq&lt;&#x2F;code&gt;. Les autres fonctions paramètrent les pin en sortie, et leurs valeurs par défauts.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;on-off&quot;&gt;On &#x2F; Off&lt;a class=&quot;zola-anchor&quot; href=&quot;#on-off&quot; aria-label=&quot;Anchor link for: on-off&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;PanasonicRemote&lt;&#x2F;span&gt;&lt;span&gt;&amp;amp; turnOn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    setBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;13&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    compute_checksum(); 
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;this;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;PanasonicRemote&lt;&#x2F;span&gt;&lt;span&gt;&amp;amp; turnOff&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    setStreamMode(StreamMode::AUTO);    &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Même comportement que la télécommand d&amp;#39;origine
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    clearBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;13&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    compute_checksum();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;this;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Pour définir l&#x27;état (on ou off) de la climatisation j&#x27;ai pris le parti de faire deux fonctions (qui retournent l&#x27;objet lui-même pour &amp;quot;chaîner&amp;quot; les appels si on le souhaite). Dans le but de simplifier le code (tant en lecture, qu&#x27;en écriture), j&#x27;utlise &lt;code&gt;clearBit&lt;&#x2F;code&gt; et &lt;code&gt;setBit&lt;&#x2F;code&gt; pour, respectivement, forcer un bit à 0 ou a 1, pour un octet donné.&lt;&#x2F;p&gt;
+&lt;p&gt;Après chaque modification de la trame on doit recalculer le &#x27;checksum&#x27;, c&#x27;est le rôle de &lt;code&gt;compute_checksum&lt;&#x2F;code&gt;, que l&#x27;on verra un peu plus tard.&lt;&#x2F;p&gt;
+&lt;p&gt;Les plus observateurs d&#x27;entre vous, auront remarqué une ligne en plus dans &lt;code&gt;turnOff&lt;&#x2F;code&gt;. Comme dit dans la partie 1, la télécommande repasse le mode de ventilation en &lt;code&gt;AUTO&lt;&#x2F;code&gt;, c&#x27;est très certainement pour ne pas qu&#x27;il reste activé en permanence, je le désactive donc moi aussi, par précaution.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;mode-de-ventilation&quot;&gt;Mode de ventilation&lt;a class=&quot;zola-anchor&quot; href=&quot;#mode-de-ventilation&quot; aria-label=&quot;Anchor link for: mode-de-ventilation&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;PanasonicRemote&lt;&#x2F;span&gt;&lt;span&gt;&amp;amp; setStreamMode&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(StreamMode &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8aa6c1;&quot;&gt;mode&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;switch&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(mode){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;case&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; StreamMode::POWERFULL:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            clearBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;21&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            setBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;21&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;break&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;case&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; StreamMode::QUIET:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            clearBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;21&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            setBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;21&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;break&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;default&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;case&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; StreamMode::AUTO:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            clearBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;21&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            clearBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;21&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;break&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    compute_checksum();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;this;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Il n&#x27;y a rien de particulier dans le code, juste une &lt;code&gt;enum&lt;&#x2F;code&gt; qui permet d&#x27;assurer que l&#x27;utilisateur ne fasse pas (inconsciemment du moins) de bêtise.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;temperature&quot;&gt;Température&lt;a class=&quot;zola-anchor&quot; href=&quot;#temperature&quot; aria-label=&quot;Anchor link for: temperature&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;PanasonicRemote&lt;&#x2F;span&gt;&lt;span&gt;&amp;amp; setTemperature&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8aa6c1;&quot;&gt;temp&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;bool &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8aa6c1;&quot;&gt;half&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;16 &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; temp &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp;&amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; temp &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;30&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;14&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0b11000001&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        data[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;14&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;|=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; temp &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( half &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp;&amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; temp &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;30&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            setBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;14&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            compute_checksum();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            clearBit(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;14&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            compute_checksum();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;this;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Le réglage de la température ne se limite pas à un simple bit, comme pour les autres réglages, c&#x27;est un petit peu plus subtil. Déjà, il faut s&#x27;assurer que la température est correcte, c&#x27;est la responsabilité de la ligne &lt;code&gt;if( 16 &amp;lt;= temp &amp;amp;&amp;amp; temp &amp;lt;= 30)&lt;&#x2F;code&gt;. Si la température n&#x27;est pas bonne, alors on ne fait rien, on ignore la demande. Dans le cas contraire, on commence par &amp;quot;effacer&amp;quot; la température enregistrée &lt;code&gt;data[14] &amp;amp;= 0b11000001;&lt;&#x2F;code&gt; effectue un &amp;quot;et logique&amp;quot; afin de forcer les bits 6 à 2 au niveau logique 0. Puis on enregistre la valeur &lt;strong&gt;entière&lt;&#x2F;strong&gt; de la température avec &lt;code&gt;data[14] |= temp &amp;lt;&amp;lt; 1;&lt;&#x2F;code&gt; (&lt;code&gt;&amp;lt;&amp;lt;&lt;&#x2F;code&gt; signifie que l&#x27;on décale d&#x27;un bit vers la &lt;em&gt;gauche&lt;&#x2F;em&gt;). Reste en ensuite à gérer le &amp;quot;demi&amp;quot;, mais seulement si la valeur est strictement inférieure à 30°C.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;feu&quot;&gt;Feu !&lt;a class=&quot;zola-anchor&quot; href=&quot;#feu&quot; aria-label=&quot;Anchor link for: feu&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;send&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    start_bit();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Header
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; octet &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; octet &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;8&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;octet ){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; bit &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; bit &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;8&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; bit&lt;&#x2F;span&gt;&lt;span&gt;++ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            set_high();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            delayMicroseconds(BIT_HIGH_TIME);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            set_low();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( (data[octet] &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1 &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; bit)) &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;                delayMicroseconds(BIT_LOW_1_TIME);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;                delayMicroseconds(BIT_LOW_0_TIME);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    stop_bit();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    start_bit();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Body
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; octet &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;8&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; octet &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; PANASONIC_DATA_SIZE; &lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;octet ){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; bit &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; bit &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;8&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; bit&lt;&#x2F;span&gt;&lt;span&gt;++ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            set_high();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            delayMicroseconds(BIT_HIGH_TIME);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            set_low();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( (data[octet] &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1 &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; bit)) &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;                delayMicroseconds(BIT_LOW_1_TIME);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;                delayMicroseconds(BIT_LOW_0_TIME);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    stop_bit();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; [...]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;inline void &lt;&#x2F;span&gt;&lt;span&gt;set_high&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    digitalWrite(pin_led, HIGH);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;inline void &lt;&#x2F;span&gt;&lt;span&gt;set_low&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    digitalWrite(pin_led, LOW);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Tout ce qui nous reste à faire maintenant, c&#x27;est d&#x27;envoyer nos paramètres. Comme toutes les trames on doit envoyer notre &amp;quot;bit de start&amp;quot; pour prévenir le récepteur que l&#x27;on va envoyer des données, c&#x27;est &lt;code&gt;start_bit&lt;&#x2F;code&gt; qui s&#x27;en charge. Les premières données transmises sont celles du header, soit les 8 premiers octets de notre trame. On remarque l&#x27;utilisation de &lt;code&gt;set_high&lt;&#x2F;code&gt; et &lt;code&gt;set_low&lt;&#x2F;code&gt; qui ne sont présentes que pour rendre le code plus lisible. On retrouve nos constantes de temps que nous avons déclarées au début du programme.&lt;&#x2F;p&gt;
+&lt;p&gt;Une fois le header transmit c&#x27;est au tour du body, mais avant cela il faut marqué la fin de cette première partie, on emet un &amp;quot;bit de stop&amp;quot; suivi d&#x27;un &amp;quot;bit de start&amp;quot;. Puis, en suivant la même procédure, on envoie le reste de la trame.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;pour-finir&quot;&gt;Pour finir&lt;a class=&quot;zola-anchor&quot; href=&quot;#pour-finir&quot; aria-label=&quot;Anchor link for: pour-finir&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;Maintenant que nous avons une classe qui permet de produire et d&#x27;émettre les trames pour contrôler notre climatiseur, il ne reste plus qu&#x27;à l&#x27;utiliser comme bon nous semble ! Pour ma part il sera contrôlé via une API Web mise a disposition par l&#x27;ESP. Cette même API sera utilisée par HomeAssistant.&lt;&#x2F;p&gt;
+&lt;p&gt;Retrouvez le projet PlatformIO sur mon &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jnthbdn&#x2F;esp_clim_controller&quot;&gt;GitHub&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p class=&quot;right&quot;&gt;Bidouillez-bien&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;D&#x27;après l&#x27;ISO 20473:2007. &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;fr.wikipedia.org&#x2F;wiki&#x2F;Infrarouge#D%C3%A9coupage_ISO&quot;&gt;Source&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;2&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;Des valeurs non nommées, et dont il peut être difficile de connaître la signification ou la raison de leurs utilisations. &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;fr.wikipedia.org&#x2F;wiki&#x2F;Nombre_magique_(programmation)#Constantes_num%C3%A9riques_non_nomm%C3%A9es&quot;&gt;Source&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="fr">
+        <title>Hack télécommande climatiseur (Part 1)</title>
+        <published>2023-07-16T00:00:00+00:00</published>
+        <updated>2023-07-16T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://jnthbdn.github.io/hack-clim-part1/" type="text/html"/>
+        <id>https://jnthbdn.github.io/hack-clim-part1/</id>
+        
+        <content type="html">&lt;h1 id=&quot;pourquoi-faire-ca&quot;&gt;Pourquoi faire ça ?&lt;a class=&quot;zola-anchor&quot; href=&quot;#pourquoi-faire-ca&quot; aria-label=&quot;Anchor link for: pourquoi-faire-ca&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;Cela fait déjà quelque temps que j&#x27;ai passé la domotique de la maison sous HomeAssistant. Entre la simplicité d&#x27;installation (sur un Raspberry Pi), d&#x27;utilisation et surtout l&#x27;application pour téléphone (Android &amp;amp; iPhone), c&#x27;est juste parfait. Dans un premier temps se fut le contrôle des lumières intérieurs, puis extérieurs (autant en profiter quand on fait les travaux 😄), le bassin des poissons et pour terminer par les prises.&lt;&#x2F;p&gt;
+&lt;p&gt;Justement, les prises, parlons-en ! Ce sont de simple prise (probablement acheté sur Amazon à quelques euros), fonctionnant en 433 MHz, rien de sorcier un Arduino, un module RF et la lib qui va bien et hop ! On copie les codes d&#x27;allumage et d&#x27;extinction, tout va bien !&lt;&#x2F;p&gt;
+&lt;p&gt;Bref ! Ma folie de domotisation (&lt;em&gt;ça se dit ? 🤔&lt;&#x2F;em&gt;), étant passé je reste avec une bonne impression, beaucoup de câbles tirés, mais dans l&#x27;ensemble rien de compliqué...&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;Pour être tout à fait honnête je crois que ce qui m&#x27;a consommé le plus de temps, était l&#x27;intégration de la météo du jour... Pour ne pas s&#x27;en servir au final 😒&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Ainsi il y a quelques jours, on se dit que cela serait &amp;quot;vachement bien&amp;quot; de pouvoir allumer&#x2F;éteindre la clim à distance ! Que ce soit parce qu’on a la flemme de se lever prendre la télécommande (ou pire, monté à l&#x27;étage la chercher 😱), ou juste parce qu’on est sorti (il fait 200°C à l&#x27;ombre) et qu&#x27;on voudrait bien que la chambre soit fraîche en arrivant.&lt;&#x2F;p&gt;
+&lt;p&gt;A cet instant très précis, je pensais que cela devait être simple... &lt;&#x2F;p&gt;
+&lt;h1 id=&quot;les-ennuis-commencent&quot;&gt;Les ennuis commencent&lt;a class=&quot;zola-anchor&quot; href=&quot;#les-ennuis-commencent&quot; aria-label=&quot;Anchor link for: les-ennuis-commencent&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;La particularité de la télécommande c&#x27;est qu&#x27;elle fonctionne en &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;fr.wikipedia.org&#x2F;wiki&#x2F;Infrarouge&quot;&gt;infrarouge&lt;&#x2F;a&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#1&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;. Non pas que ce soit particulier pour une télécommande, mais plutôt pour moi (ça fait trèèès longtemps que j&#x27;ai plus joué avec de l&#x27;infrarouge).&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Bof !...un récepteur, une copie des signaux logiques et on est bon !?&lt;&#x2F;p&gt;
+&lt;div class=&quot;author&quot;&gt;Moi peu de temps avant le drame&lt;&#x2F;div&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Après quelques minutes (intense) de réflexion, l’idée de copier les codes envoyés par la télécommande c&#x27;est avéré être d&#x27;une bêtise assez profonde. Pour simplifier les choses, je ne veux que contrôler 3 fonctions :&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;ON &#x2F; OFF&lt;&#x2F;li&gt;
+&lt;li&gt;La température&lt;&#x2F;li&gt;
+&lt;li&gt;Le mode de ventilation&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Or, ma climatision me permet d&#x27;aller de 16°C à 30°C par tranche de 0.5°C, ce qui fait 29*4 = 116 codes différents (+ 1 pour le mode OFF), ça fait beaucoup... Alors qu&#x27;il serait plus simple de comprendre le signal et de l&#x27;envoyer en fonction de la température et du mode que je souhaite.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;observation-du-signal&quot;&gt;Observation du signal&lt;a class=&quot;zola-anchor&quot; href=&quot;#observation-du-signal&quot; aria-label=&quot;Anchor link for: observation-du-signal&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;p&gt;Bon n&#x27;ayant pas d&#x27;analyseur logique, j&#x27;ai commencé par utiliser mon oscilloscope et un simple montage utilisant un récepteur infrarouge (VS1838B).&lt;&#x2F;p&gt;
+&lt;p&gt;
+  &lt;figure &gt;
+    &lt;a href=&quot;.&#x2F;img&#x2F;ensemble.BMP&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;.&#x2F;img&#x2F;ensemble.BMP&quot; style=&quot;width: 75%;&quot; &#x2F;&gt;
+    &lt;&#x2F;a&gt;
+    
+      &lt;figcaption &gt;Trame infrarouge -- 1V&amp;#x2F;div - 25ms&amp;#x2F;div&lt;&#x2F;figcaption&gt;
+    
+  &lt;&#x2F;figure&gt;
+
+
+La trame est plutôt longue (quasiment 150 ms), on peut distinguer deux &amp;quot;parties&amp;quot; dans la trame. Puisqu&#x27;elles ne font pas la même taille, ce n&#x27;est pas de la redondance, mais bien deux informations distinctes. Pour faire simple, on va appeler la première partie le &lt;strong&gt;header&lt;&#x2F;strong&gt;, et la seconde le &lt;strong&gt;body&lt;&#x2F;strong&gt;.&lt;br &#x2F;&gt;
+Sur l&#x27;oscillogramme (je sais... ce mot fait vieux 😄), on peut noter que le signal de séparation est identique au signal du début de la trame, on va donc appeler &lt;strong&gt;bit de start&lt;&#x2F;strong&gt;, un état haut long suivi d&#x27;un état bas long.&lt;&#x2F;p&gt;
+
+  &lt;figure &gt;
+    &lt;a href=&quot;.&#x2F;img&#x2F;header.BMP&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;.&#x2F;img&#x2F;header.BMP&quot; style=&quot;width: 75%;&quot; &#x2F;&gt;
+    &lt;&#x2F;a&gt;
+    
+      &lt;figcaption &gt;header composé de 8 octets -- 1V&amp;#x2F;div - 5ms&amp;#x2F;div&lt;&#x2F;figcaption&gt;
+    
+  &lt;&#x2F;figure&gt;
+
+&lt;p&gt;Observons le signal de plus près.&lt;&#x2F;p&gt;
+&lt;div class=&quot;encart&quot;&gt;
+    &lt;div class=&quot;icon&quot;&gt;
+      
+        🚧
+        
+      
+    &lt;&#x2F;div&gt;
+    &lt;div class=&quot;content&quot;&gt;&lt;p&gt;Le signal présent capturé par l&#x27;oscilloscope est inversé. Le montage utilisé pour capturer les trames IR, inverse le signal. Il faut garder à l&#x27;esprit (surtout lors de la partie 2), qu&#x27;un &amp;quot;état bas&amp;quot; représente un &amp;quot;état haut&amp;quot; pour la LED IR émettrice.&lt;br &#x2F;&gt;
+Pour simplifier la lecture, je vais garder les états présents sur les captures d&#x27;écran.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;&#x2F;div&gt;&lt;h2 id=&quot;comprendre-le-signal&quot;&gt;Comprendre le signal&lt;a class=&quot;zola-anchor&quot; href=&quot;#comprendre-le-signal&quot; aria-label=&quot;Anchor link for: comprendre-le-signal&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+
+  &lt;figure &gt;
+    &lt;a href=&quot;.&#x2F;img&#x2F;donnee.BMP&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;.&#x2F;img&#x2F;donnee.BMP&quot; style=&quot;width: 75%;&quot; &#x2F;&gt;
+    &lt;&#x2F;a&gt;
+    
+      &lt;figcaption &gt;1er octect du header -- 1V&amp;#x2F;div - 500µs&amp;#x2F;div&lt;&#x2F;figcaption&gt;
+    
+  &lt;&#x2F;figure&gt;
+
+&lt;p&gt;Le signal semble être composé d&#x27;état bas toujours de même durée (~ 400µs) et d&#x27;état haut de durée variable (soit ~ 400µs, soit ~ 1300µs), en plus du &lt;em&gt;bit de start&lt;&#x2F;em&gt; observé précédemment. C&#x27;est donc en modifiant la durée de l&#x27;état haut, que la télécommande peut envoyer des données au format binaires.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Dans ce cas-là, c&#x27;est quoi un &#x27;1&#x27; c&#x27;est quoi un &#x27;0&#x27; ?&lt;&#x2F;p&gt;
+&lt;div class=&quot;author&quot;&gt;Un inconnu à l&#x27;air cynique&lt;&#x2F;div&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Ben... on ne sait pas justement, alors on va se baser sur ce qui se fait déjà. En cherchant un peu sur internet, il semble ressortir plus souvent qu&#x27;un temps sans transmission &amp;quot;court&amp;quot; est un &#x27;0&#x27; logique et un signal &amp;quot;long&amp;quot; est un &#x27;1&#x27; logique. Ainsi l&#x27;image ci-dessus montre l&#x27;émission de 8 bits &lt;code&gt;01000000&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Pour être un peu plus précis, il semblerait que les données soit transmises en &amp;quot;LSB-first&amp;quot;, c&#x27;est-à-dire que le premier bit reçu, est le bit de poids faible (et le dernier celui de poids fort), donc l&#x27;octet transmit ci-dessus est : &lt;code&gt;00000010&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;decoder-le-signal&quot;&gt;Décoder le signal&lt;a class=&quot;zola-anchor&quot; href=&quot;#decoder-le-signal&quot; aria-label=&quot;Anchor link for: decoder-le-signal&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;p&gt;Chouette ! On sait comment lire le signal, mais il faudrait maintenant le &amp;quot;capturer&amp;quot; et le décoder (comprendre le rôle de chaque bit). Or comme dit plus haut je n&#x27;ai (toujours) pas d&#x27;analyseur logique et, comme je ne compte pas investir dans les prochains jours, on va faire avec ce que j&#x27;ai sous la main.&lt;&#x2F;p&gt;
+&lt;p&gt;Oh ! Un ESP8266 que j&#x27;avais prévu d&#x27;utiliser pour ce projet (ce sera la partie 2 😉) ! Voici le schéma de montage:&lt;&#x2F;p&gt;
+
+  &lt;figure &gt;
+    &lt;a href=&quot;.&#x2F;img&#x2F;schema_montage.png&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;.&#x2F;img&#x2F;schema_montage.png&quot; style=&quot;width: 75%;&quot; &#x2F;&gt;
+    &lt;&#x2F;a&gt;
+    
+      &lt;figcaption &gt;Schéma de montage de l&amp;#x27;ESP (NodeMCU) et du recepteur IR&lt;&#x2F;figcaption&gt;
+    
+  &lt;&#x2F;figure&gt;
+
+&lt;p&gt;Comme on l&#x27;a vu précédemment, l&#x27;état bas dure 400µs, ce qui est très court, même pour notre ESP. On va donc découper le programme en deux temps :&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Écoute et enregistrement des temps de chaque impulsions (via l&#x27;usage des interruptions&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#2&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;)&lt;&#x2F;li&gt;
+&lt;li&gt;Analyse de la trame enregistrée et affichage au format binaire (plus simple pour décoder, vous allez voir pourquoi 😉)&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;On ouvre VSCode et on crée un nouveau projet &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;platformio.org&#x2F;&quot;&gt;PlatformIO&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;ecoute-enregistrement&quot;&gt;Ecoute &amp;amp; Enregistrement&lt;a class=&quot;zola-anchor&quot; href=&quot;#ecoute-enregistrement&quot; aria-label=&quot;Anchor link for: ecoute-enregistrement&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;lt;Arduino.h&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;constexpr &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint16_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; RAW_BUFFER_SIZE &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1024&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; last &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; raw[RAW_BUFFER_SIZE] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;};
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; raw_idx &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; IRAM_ATTR &lt;&#x2F;span&gt;&lt;span&gt;isr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; now &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;micros();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( last &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        raw[raw_idx&lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; now &lt;&#x2F;span&gt;&lt;span&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; last;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    last &lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; now;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;setup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  Serial.begin(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;115200&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  attachInterrupt(digitalPinToInterrupt(D6), isr, CHANGE);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;volatile &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint32_t&lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0x60000900&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp;= ~&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;); &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Hardware WDT OFF
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;loop&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Bon rien de bien compliqué mais on va reprendre le code pour être sûr de comprendre.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;lt;Arduino.h&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;constexpr &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint16_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; RAW_BUFFER_SIZE &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1024&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; last &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; raw[RAW_BUFFER_SIZE] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;};
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; raw_idx &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Dans un premier temps on inclut &lt;code&gt;Arduino.h&lt;&#x2F;code&gt;, on est dans PlatformIO donc c&#x27;est normal. On déclare un constante &lt;code&gt;RAW_BUFFER_SIZE&lt;&#x2F;code&gt; qui représente la taille de notre tableau qui enregistrera les temps entre chaque impulsion (1024 est probablement overkill, mais bon je préfère être large 😅). Pour finir on déclare et initialise deux variables, &lt;code&gt;raw_idx&lt;&#x2F;code&gt; qui est le prochain indice du tableau dans lequel placer notre mesure et &lt;code&gt;raw&lt;&#x2F;code&gt; le tableau dans lequel nous allons stocker nos mesures.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; IRAM_ATTR &lt;&#x2F;span&gt;&lt;span&gt;isr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; now &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;micros();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( last &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        raw[raw_idx&lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; now &lt;&#x2F;span&gt;&lt;span&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; last;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    last &lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; now;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; ...
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;loop&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Écartons ensuite les deux fonctions les plus simples. &lt;code&gt;isr()&lt;&#x2F;code&gt; sera la fonction appelée lors de l&#x27;interruption, elle mesure via &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.arduino.cc&#x2F;reference&#x2F;en&#x2F;language&#x2F;functions&#x2F;time&#x2F;micros&#x2F;&quot;&gt;&lt;code&gt;micros()&lt;&#x2F;code&gt;&lt;&#x2F;a&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#3&quot;&gt;3&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; le temps qu&#x27;a durée l&#x27;état (haut ou bas), puis place le résultat dans le tableau et termine en incrémentant &lt;code&gt;raw_idx&lt;&#x2F;code&gt; de 1. La condition &lt;code&gt;if( last &amp;gt; 0 )&lt;&#x2F;code&gt; vérifie s&#x27;il s&#x27;agit de la première mesure.&lt;br &#x2F;&gt;
+Quant à &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.arduino.cc&#x2F;reference&#x2F;en&#x2F;language&#x2F;structure&#x2F;sketch&#x2F;loop&#x2F;&quot;&gt;&lt;code&gt;loop&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; (qui est la fonction appelée perpétuellement par Arduino), elle ne fait rien...&lt;&#x2F;p&gt;
+&lt;div class=&quot;encart&quot;&gt;
+    &lt;div class=&quot;icon&quot;&gt;
+      
+        ℹ️
+        
+      
+    &lt;&#x2F;div&gt;
+    &lt;div class=&quot;content&quot;&gt;&lt;p&gt;Pour ceux qui se demandent: &amp;quot;pourquoi ne pas utiliser &lt;code&gt;digitalRead(...)&lt;&#x2F;code&gt; dans &lt;code&gt;loop()&lt;&#x2F;code&gt; plutôt que les interruptions ?&amp;quot;&lt;br &#x2F;&gt;
+La raison est simple, cette fonction est très longue à s&#x27;exécuter, si à cela on ajoute le temps de la comparaison (du &lt;code&gt;if(...)&lt;&#x2F;code&gt;) puis le temps d&#x27;enregistrement des données, on pourrait &amp;quot;rater&amp;quot; certaines impulsions. &lt;em&gt;De plus, je trouve le code, avec l&#x27;interruption, plus court et plus lisible.&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;&#x2F;div&gt;&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;setup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  Serial.begin(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;115200&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  attachInterrupt(digitalPinToInterrupt(D6), isr, CHANGE);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;volatile &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint32_t&lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0x60000900&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp;= ~&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;); &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Hardware WDT OFF
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;On termine avec le plus important ~la bouffe~, la fonction &lt;code&gt;setup()&lt;&#x2F;code&gt;. Une fois encore rien de difficile, on initialise la liaison série, pour avoir un retour de ce qui se passe. Les deux lignes suivantes sont bien plus intéressantes. &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.arduino.cc&#x2F;reference&#x2F;en&#x2F;language&#x2F;functions&#x2F;external-interrupts&#x2F;attachinterrupt&#x2F;&quot;&gt;&lt;code&gt;attachInterrupt&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; nous permet d&#x27;attacher une interruption sur une &lt;strong&gt;pin&lt;&#x2F;strong&gt;. Dans le cas présent on veut appeler la fonction &lt;code&gt;isr()&lt;&#x2F;code&gt; lorsque la pin change d&#x27;état (de haut vers bas, ou bas vers haut). Ou dit plus simplement, sur un &lt;strong&gt;front&lt;&#x2F;strong&gt; (&lt;em&gt;montant&lt;&#x2F;em&gt; ou &lt;em&gt;descendant&lt;&#x2F;em&gt;).&lt;br &#x2F;&gt;
+L&#x27;étrange instruction &lt;code&gt;*((volatile uint32_t*) 0x60000900) &amp;amp;= ~(1);&lt;&#x2F;code&gt; permet d&#x27;écrire directement dans un registre de l&#x27;ESP pour désactiver le &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;fr.wikipedia.org&#x2F;wiki&#x2F;Chien_de_garde_(informatique)&quot;&gt;&amp;quot;watchdog&amp;quot;&lt;&#x2F;a&gt;. &lt;em&gt;Je ne vais pas entrer dans les détails, mais la fonction &lt;code&gt;wdt_disable()&lt;&#x2F;code&gt; ne marche pas (je ne sais pas pourquoi et je m&#x27;en fous un peu pour le moment 🙃).&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;analyse-affichage&quot;&gt;Analyse &amp;amp; Affichage&lt;a class=&quot;zola-anchor&quot; href=&quot;#analyse-affichage&quot; aria-label=&quot;Anchor link for: analyse-affichage&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;Maintenant que l&#x27;ESP est capable d&#x27;enregistrer l&#x27;information dont nous avons besoin, il est temps de faire l&#x27;analyse et de l&#x27;afficher sur le port série. Pour cela on va simplement modifier un peu notre fonction &lt;code&gt;loop&lt;&#x2F;code&gt; et ajouter deux nouvelles fonctions.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; ...
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Déclaration &amp;amp; initialisation des variables&#x2F;constantes et de la function isr()
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F;...
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;print_binary&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8aa6c1;&quot;&gt;byte&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;int8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; i &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;7&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span&gt;--&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;i){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    Serial.print( (byte &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0x01 &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; i)) &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;? &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;1&amp;quot; &lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;0&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;analyse_data&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; octets[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;27&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;};
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; id_bit &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; id_octet &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; On saute les deux première mesure (bit de start)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; i &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; RAW_BUFFER_SIZE; i &lt;&#x2F;span&gt;&lt;span&gt;+= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; low &lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; raw[i];
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; high &lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; raw[i&lt;&#x2F;span&gt;&lt;span&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;];
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( low &lt;&#x2F;span&gt;&lt;span&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;||&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; high &lt;&#x2F;span&gt;&lt;span&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;break&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(high &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;3000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;) {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Fin du header
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Saut des deux prochaines données (bit de start)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      i &lt;&#x2F;span&gt;&lt;span&gt;+= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( high &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1000 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; bit &amp;#39;1&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      octets[id_octet] &lt;&#x2F;span&gt;&lt;span&gt;|= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1 &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; id_bit;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      id_bit&lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( high &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;600 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;) {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; bit &amp;#39;0&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      id_bit&lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      Serial.printf(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;Erreure de trame position &lt;&#x2F;span&gt;&lt;span style=&quot;color:#66ccff;&quot;&gt;%d&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;, (L: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#66ccff;&quot;&gt;%lu&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;, H: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#66ccff;&quot;&gt;%lu&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;font-weight:bold;color:#ff2837;&quot;&gt;\r\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, i, low, high);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( id_bit &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;8 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      id_bit &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      id_octet&lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; i &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;27&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i&lt;&#x2F;span&gt;&lt;span&gt;++ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    print_binary(octets[i]);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    Serial.print(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  Serial.println(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; ...
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Fonction setup
+&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; ...
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;loop&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( Serial.available() &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp;&amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; Serial.read() &lt;&#x2F;span&gt;&lt;span&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;#39;p&amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        analyse_data();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        raw_idx &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        last &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; i &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; RAW_BUFFER_SIZE; &lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;i){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;          raw[i] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Cette fois encore on va reprendre le code par morceaux.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;print_binary&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8aa6c1;&quot;&gt;byte&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;int8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; i &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;7&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span&gt;--&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;i){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    Serial.print( (byte &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0x01 &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; i)) &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;? &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;1&amp;quot; &lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;0&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;print_binary()&lt;&#x2F;code&gt; permet d&#x27;afficher la représentaion binaire de l&#x27;argument de la fonction (un entier non-signé sur 8 bits).&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c++&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-c++ &quot;&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;analyse_data&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; octets[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;27&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;};
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; id_bit &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; id_octet &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; On saute les deux première mesure (bit de start)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; i &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; RAW_BUFFER_SIZE; i &lt;&#x2F;span&gt;&lt;span&gt;+= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; low &lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; raw[i];
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;unsigned long&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; high &lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; raw[i&lt;&#x2F;span&gt;&lt;span&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;];
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( low &lt;&#x2F;span&gt;&lt;span&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;||&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; high &lt;&#x2F;span&gt;&lt;span&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;break&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(high &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;3000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;) {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Fin du header
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; Saut des deux prochaines données (bit de start)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      i &lt;&#x2F;span&gt;&lt;span&gt;+= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( high &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1000 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; bit &amp;#39;1&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      octets[id_octet] &lt;&#x2F;span&gt;&lt;span&gt;|= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;1 &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; id_bit;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      id_bit&lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( high &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;600 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;) {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#171717;color:#616161;&quot;&gt;&#x2F;&#x2F; bit &amp;#39;0&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      id_bit&lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;else&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      Serial.printf(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;Erreure de trame position &lt;&#x2F;span&gt;&lt;span style=&quot;color:#66ccff;&quot;&gt;%d&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;, (L: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#66ccff;&quot;&gt;%lu&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;, H: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#66ccff;&quot;&gt;%lu&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;font-weight:bold;color:#ff2837;&quot;&gt;\r\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;, i, low, high);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( id_bit &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;8 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      id_bit &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;      id_octet&lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;uint8_t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; i &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;27&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i&lt;&#x2F;span&gt;&lt;span&gt;++ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    print_binary(octets[i]);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    Serial.print(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;  Serial.println(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;quot;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Voici le plus important, &lt;code&gt;analyse_data()&lt;&#x2F;code&gt; comme son nom l&#x27;indique.... analyse les données...&lt;br &#x2F;&gt;
+La fonction commence avec quelques variables :&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;octets[27]&lt;&#x2F;code&gt; : Contient les données finales (il est initialisé avec toutes ses valeurs à 0)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;id_bit&lt;&#x2F;code&gt; : Position du prochain bit à écrire&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;id_octet&lt;&#x2F;code&gt; : Position de l&#x27;octet en cours d&#x27;écriture&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Ensuite, le corps de la fonction : une boucle &lt;code&gt;for&lt;&#x2F;code&gt; qui va itérer sur toutes les mesures. Puisque les bits sont définis par deux impulsions (basse et haute), on récupère les deux à chaque fois. Les deux premières mesures peuvent être sautées, puisque c&#x27;est le &lt;em&gt;bit de start&lt;&#x2F;em&gt;. On commence par stocker, temporairement, les deux temps dans les variables &lt;code&gt;low&lt;&#x2F;code&gt; et &lt;code&gt;high&lt;&#x2F;code&gt;, puis on s&#x27;en sert pour identifier quelle information ils représentent :&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Une des deux données à pour valeur &lt;code&gt;0&lt;&#x2F;code&gt;, cela signifie qu&#x27;il n&#x27;y a plus rien à traiter, on sort de la boucle.&lt;&#x2F;li&gt;
+&lt;li&gt;La valeur &lt;code&gt;high&lt;&#x2F;code&gt; est supérieure à 3000, c&#x27;est la fin du header, on ignore donc ces valeurs plus les deux suivantes du &lt;em&gt;bit de start&lt;&#x2F;em&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;La valeur &lt;code&gt;high&lt;&#x2F;code&gt; est supérieure à 1000 (mais inférieur a 3000), c&#x27;est un bit de valeur &lt;code&gt;1&lt;&#x2F;code&gt;. On l&#x27;enregistre et on incrémente le compteur &lt;code&gt;id_bit&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;la valeur de &lt;code&gt;high&lt;&#x2F;code&gt; est inférieure à 600, c&#x27;est un bit de valeur &lt;code&gt;0&lt;&#x2F;code&gt;. Le bit en cours vaut dejà 0, on incrémente le compteur &lt;code&gt;id_bit&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Si aucun des cas suivant n&#x27;est le bon, alors on considère que c&#x27;est une erreur est on l&#x27;affiche.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;div class=&quot;encart&quot;&gt;
+    &lt;div class=&quot;icon&quot;&gt;
+      
+        ℹ️
+        
+      
+    &lt;&#x2F;div&gt;
+    &lt;div class=&quot;content&quot;&gt;&lt;p&gt;Les règles de détection (condition &lt;code&gt;if&lt;&#x2F;code&gt;) sont très naïves, mais le but ici n&#x27;est pas de recréer un récepteur IR fiable, mais simplement comprendre les trames.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;&#x2F;div&gt;&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#191919;color:#ffffff;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;loop&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;(){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( Serial.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;available&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;() &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;&amp;amp;&amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt; Serial.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;read&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;() &lt;&#x2F;span&gt;&lt;span&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffd700;&quot;&gt;&amp;#39;p&amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8aa6c1;&quot;&gt;analyse_data&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        raw_idx &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        last &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#80d500;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;( unsigned i &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; i &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#66ccff;&quot;&gt;RAW_BUFFER_SIZE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;i){
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;          raw[i] &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eddd5a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;        }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccccc;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Pour terminer, on modifie la fonction &lt;code&gt;loop&lt;&#x2F;code&gt; pour y appeler notre fonction d&#x27;analyse en envoyant la lettre &lt;code&gt;p&lt;&#x2F;code&gt; (minuscule) sur le port série. Une fois l&#x27;analyse faites on se prépare pour une nouvelle.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;Si vous voulez un exemple de ce que donnent les valeurs &amp;quot;brut&amp;quot; (avant analyse), &lt;a href=&quot;https:&#x2F;&#x2F;jnthbdn.github.io&#x2F;hack-clim-part1&#x2F;.&#x2F;exemple_raw_data.txt&quot;&gt;c&#x27;est par ici 📄&lt;&#x2F;a&gt;&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Pfiouuu... Voilà une bonne chose de faite &lt;em&gt;*craquements de dos*&lt;&#x2F;em&gt; ! Il est temps de regarder ce que ça donne !&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;comprendre-le-signal-1&quot;&gt;Comprendre le signal&lt;a class=&quot;zola-anchor&quot; href=&quot;#comprendre-le-signal-1&quot; aria-label=&quot;Anchor link for: comprendre-le-signal-1&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110010 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 11100111&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Notre première mesure ! Top... mais qu&#x27;est ce qu&#x27;on en fait ?!
+Ben... comme ça, pas grand chose, enfin si. On sait, d&#x27;après notre télécommande, que ce signal veut dire :&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;État: Marche&lt;&#x2F;li&gt;
+&lt;li&gt;Température: 25.0°C&lt;&#x2F;li&gt;
+&lt;li&gt;Mode de ventilation: AUTO&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;em&gt;Tout le reste en mode &#x27;AUTO&#x27; (ou du moins les valeurs par défaut, car j&#x27;ai réinitialisé la télécommande)&lt;&#x2F;em&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;la-temperature&quot;&gt;La Température&lt;a class=&quot;zola-anchor&quot; href=&quot;#la-temperature&quot; aria-label=&quot;Anchor link for: la-temperature&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;Maintenant pour savoir quel bit représente quoi... il nous faut comparer. Je vais augmenter la température &amp;quot;d&#x27;un cran&amp;quot; soit 0.5°C.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 0011001&lt;span class=&quot;diff&quot;&gt;1&lt;&#x2F;span&gt; 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 1110&lt;span class=&quot;diff&quot;&gt;1000&lt;&#x2F;span&gt;&lt;&#x2F;p&gt;
+&lt;div class=&quot;author&quot;&gt;État : On - Temperature : 25.5°C - Mode de ventilation : AUTO &lt;br&#x2F;&gt;&lt;i class=&quot;tiny&quot;&gt;En rouge les différences avec la trame précédente&lt;&#x2F;i&gt;&lt;&#x2F;div&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Visiblement il y a plusieurs modifications :&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Le bit 1 de l&#x27;octet 15&lt;&#x2F;li&gt;
+&lt;li&gt;Les bits 4 à 1 de l&#x27;octet 27&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Ignorons pour le moment l&#x27;octet 27, et regardons un peu plus près le 15e: &lt;code&gt;00110011&lt;&#x2F;code&gt;.&lt;br &#x2F;&gt;
+Vous le voyez ? Non... attendez je vais le mettre en plus gros $ \large{00110011} $...&lt;br &#x2F;&gt;
+Toujours pas !? Ok... $\small{0}\large{11001}\small{10}$.&lt;br &#x2F;&gt;
+Et oui : 25 en binaire !&lt;&#x2F;p&gt;
+&lt;p&gt;Si notre hypothèse est juste les bits 6 à 2 sont la valeur entière de la température et le bit 1 représente le &amp;quot;demi&amp;quot;. Pour vérifier on va encore monter la température de 0.5°C (soit 26.0°C) nous devrions voir &lt;code&gt;11010&lt;&#x2F;code&gt; (26 en binaire) pour la partie entière et &lt;code&gt;0&lt;&#x2F;code&gt; pour le demi.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110&lt;span class=&quot;diff&quot;&gt;100&lt;&#x2F;span&gt; 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 1110100&lt;span class=&quot;diff&quot;&gt;1&lt;&#x2F;span&gt;&lt;&#x2F;p&gt;
+&lt;div class=&quot;author&quot;&gt;État : On - Temperature : 26.0°C - Mode de ventilation : AUTO &lt;br&#x2F;&gt;&lt;i class=&quot;tiny&quot;&gt;En rouge les différences avec la trame précédente&lt;&#x2F;i&gt;&lt;&#x2F;div&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;🎉 Parfait !&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;le-checksum&quot;&gt;Le checksum&lt;a class=&quot;zola-anchor&quot; href=&quot;#le-checksum&quot; aria-label=&quot;Anchor link for: le-checksum&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;Maintenant il reste à comprendre ce qu&#x27;est le 27e octet qui change tout le temps... &lt;em&gt;tout le temps&lt;&#x2F;em&gt;...  &lt;em&gt;tout le temps&lt;&#x2F;em&gt;... ... ...  UN &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;fr.wikipedia.org&#x2F;wiki&#x2F;Somme_de_contr%C3%B4le&quot;&gt;CHECKSUM&lt;&#x2F;a&gt; !&lt;&#x2F;p&gt;
+&lt;p&gt;En effet, le climatiseur doit pouvoir vérifier si la trame qu&#x27;il a reçue est correcte et pour cela le plus simple est d&#x27;utiliser un &lt;em&gt;checksum&lt;&#x2F;em&gt;. Comme son nom l&#x27;indique il s&#x27;agit d&#x27;une &lt;em&gt;somme&lt;&#x2F;em&gt;, mais comme il est codé sur un octet, la valeur finale sera le reste de la division par 256 ($ 2^8 $). Le &lt;em&gt;header&lt;&#x2F;em&gt; (qui ne change jamais) ne rentre pas dans le calcul, uniquement les octets du &lt;em&gt;body&lt;&#x2F;em&gt; son utilisés (et sauf le checksum, évidemment).
+$$ checksum = \left( \sum_{i=9}^{26} octet_i \right) \mod 256 $$ 
+En prenant comme example notre trame précédente :
+$$checksum = 11101001 = (233)_{10}\newline
+\ \newline
+00000010 + 00100000 + 11100000 + 00000100 + 00000000 + \newline
+00001001 + 00110100 + 10000000 + 10101111 + 00000000 + \newline
+00000000 + 00001110 + 11100000 + 00000000 + 00000000 + \newline
+10001001 + 00000000 +  00000000 + 11101001 = (1001)_{10} \newline
+\ \newline
+1001 \mod 256 = 233$$&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;marche-arret&quot;&gt;Marche &#x2F; Arret&lt;a class=&quot;zola-anchor&quot; href=&quot;#marche-arret&quot; aria-label=&quot;Anchor link for: marche-arret&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;Comme pour la température on va procéder exactement de la même manière. En partant de la trame précédente, je vais appuyer sur le bouton pour éteindre la climatisation.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 0000100&lt;span class=&quot;diff&quot;&gt;0&lt;&#x2F;span&gt; 00110100 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 1110100&lt;span class=&quot;diff&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;p&gt;
+&lt;div class=&quot;author&quot;&gt;État: Off - Temperature: 26.0°C - Mode de ventilation: AUTO &lt;br&#x2F;&gt;&lt;i class=&quot;tiny&quot;&gt;En rouge les différences avec la trame précédente&lt;&#x2F;i&gt;&lt;&#x2F;div&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Bon... ben voilà... Visiblement l&#x27;état (on&#x2F;off) de la clim est déterminé par 1 seul bit : Le bit 1 de l&#x27;octet 14.&lt;&#x2F;p&gt;
+&lt;p&gt;On passe à la suite !?&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;mode-de-ventilation&quot;&gt;Mode de ventilation&lt;a class=&quot;zola-anchor&quot; href=&quot;#mode-de-ventilation&quot; aria-label=&quot;Anchor link for: mode-de-ventilation&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h3&gt;
+&lt;p&gt;Ma climatisation possède 3 modes de ventilation:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Auto (par défaut)&lt;&#x2F;li&gt;
+&lt;li&gt;Powerfull&lt;&#x2F;li&gt;
+&lt;li&gt;Quiet&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Regardons les trois trames.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110100 10000000 10101111 00000000 00000000 00001110 11100000 00000000 00000000 10001001 00000000 00000000 11101001&lt;&#x2F;p&gt;
+&lt;div class=&quot;author&quot;&gt;État: On - Température: 26.0°C - Mode de ventilation: AUTO&lt;&#x2F;div&gt;  
+&lt;p&gt;00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110100 10000000 10101111 00000000 00000000 00001110 11100000 0000000&lt;span class=&quot;diff&quot;&gt;1&lt;&#x2F;span&gt; 00000000 10001001 00000000 00000000 111010&lt;span class=&quot;diff&quot;&gt;10&lt;&#x2F;span&gt;&lt;&#x2F;p&gt;
+&lt;div class=&quot;author&quot;&gt;État: On - Température: 26.0°C - Mode de ventilation: Powerfull &lt;br&#x2F;&gt;&lt;i class=&quot;tiny&quot;&gt;En rouge les différences avec la trame précédente&lt;&#x2F;i&gt;&lt;&#x2F;div&gt;  
+&lt;p&gt;00000010 00100000 11100000 00000100 00000000 00000000 00000000 00000110 00000010 00100000 11100000 00000100 00000000 00001001 00110100 10000000 10101111 00000000 00000000 00001110 11100000 00&lt;span class=&quot;diff&quot;&gt;1&lt;&#x2F;span&gt;0000&lt;span class=&quot;diff&quot;&gt;0&lt;&#x2F;span&gt; 00000000 10001001 00000000 00000000 &lt;span class=&quot;diff&quot;&gt;000&lt;&#x2F;span&gt;010&lt;span class=&quot;diff&quot;&gt;01&lt;&#x2F;span&gt;&lt;&#x2F;p&gt;
+&lt;div class=&quot;author&quot;&gt;État: On - Température: 26.0°C - Mode de ventilation: Quiet &lt;br&#x2F;&gt;&lt;i class=&quot;tiny&quot;&gt;En rouge les différences avec la trame précédente&lt;&#x2F;i&gt;&lt;&#x2F;div&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Cela est surprenant, les modes (pourtant mutuellement exclusif) ne sont pas codés sur deux bits consécutifs. Le mode &#x27;powerfull&#x27; est contrôlé par le bit 1 de l&#x27;octet 22 et le mode &#x27;quiet&#x27; par le bit 6. (Je me demande ce qui se passe si c&#x27;est deux bits sont à 1 🤔).&lt;&#x2F;p&gt;
+&lt;div class=&quot;encart&quot;&gt;
+    &lt;div class=&quot;icon&quot;&gt;
+      
+        ℹ️
+        
+      
+    &lt;&#x2F;div&gt;
+    &lt;div class=&quot;content&quot;&gt;&lt;p&gt;Lors de l&#x27;arrêt, la télécommande envoie le mode AUTO, je ne sais pas vraiment pourquoi, mais il faudra le garder à l&#x27;esprit lors de l&#x27;écriture de notre télécommande.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;&#x2F;div&gt;&lt;h2 id=&quot;la-suite&quot;&gt;La suite&lt;a class=&quot;zola-anchor&quot; href=&quot;#la-suite&quot; aria-label=&quot;Anchor link for: la-suite&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h2&gt;
+&lt;p&gt;Ce fut long (et encore, j&#x27;ai simplifier des trucs 😄), mais on y est arrivé. 
+On pourrait répertorier la fonction de chacun des bits de la trame (minuteurs, puissance de ventilation, orientation du flux d&#x27;air, ...), mais je n&#x27;ai pas besoin de plus pour ce projet. Si l&#x27;envie me prend je ferais un post.&lt;&#x2F;p&gt;
+&lt;p&gt;La prochaine étape est de contrôler cela à partir d&#x27;un ESP8266, embarquant un serveur web sur lequel HomeAssistant pourra envoyer des requêtes...
+Bref, tout un programme...&lt;&#x2F;p&gt;
+&lt;p&gt;Retrouver le projet PlatformIO, avec le code source sur github: &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jnthbdn&#x2F;ir_sniffer&quot;&gt;https:&#x2F;&#x2F;github.com&#x2F;jnthbdn&#x2F;ir_sniffer&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;On se retrouve pour la partie 2 !&lt;&#x2F;p&gt;
+&lt;p class=&quot;right&quot;&gt;Bidouillez-bien&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;1&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;un rayonnement invisible pour l&#x27;humain, plutôt pratique pour communiqué sur de courte distance&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;2&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;Les interruptions permettent de stopper le programme en cours pour exécuter un autre morceau de code.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;3&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;3&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;code&gt;micros()&lt;&#x2F;code&gt; retourne le temps en &lt;em&gt;microsecondes&lt;&#x2F;em&gt; depuis le démarrage (ou dernier reset) de l&#x27;ESP.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="fr">
+        <title>Premier post</title>
+        <published>2023-07-16T00:00:00+00:00</published>
+        <updated>2023-07-16T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://jnthbdn.github.io/premier-post/" type="text/html"/>
+        <id>https://jnthbdn.github.io/premier-post/</id>
+        
+        <content type="html">&lt;h1 id=&quot;hello-world&quot;&gt;Hello World !&lt;a class=&quot;zola-anchor&quot; href=&quot;#hello-world&quot; aria-label=&quot;Anchor link for: hello-world&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;Bon ben voilà... ça fait déjà quelque temps que j&#x27;y pense et je me lance enfin... Mon blog... &lt;em&gt;ouaw quand je dis ça j&#x27;ai l&#x27;impression d&#x27;ouvrir un skyblog et je me fais un peu pitié, mais bon tant pis...&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Par contre j&#x27;ai décidé de faire simple et le site sera du static (comme j&#x27;aime bien rust 🦀) ce sera avec &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.getzola.org&#x2F;&quot;&gt;&lt;code&gt;Zola&lt;&#x2F;code&gt;&lt;&#x2F;a&gt;, et le thème &lt;code&gt;zerm&lt;&#x2F;code&gt; par &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ejmg&#x2F;zerm&quot;&gt;ejmg&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;et-pourquoi-faire&quot;&gt;Et pourquoi faire ?&lt;a class=&quot;zola-anchor&quot; href=&quot;#et-pourquoi-faire&quot; aria-label=&quot;Anchor link for: et-pourquoi-faire&quot;&gt;§&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;&lt;em&gt;Sûrement par narcissisme...&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Avoir un endroit où je peux partager et garder des projets&#x2F;notes&#x2F;idées&#x2F;etc que j&#x27;ai pu avoir. Quand je travaille sur un side-project, je me rends compte que je pourrais contribuer à la documentation de certaines choses, ou simplement partager mon expérience (que ce soit en prog, électronique, impression 3D, ou que sais-je). &lt;&#x2F;p&gt;
+&lt;p&gt;Parfois, le blog d&#x27;un pur inconnu pour nous aider à résoudre nos p&#x27;tits problèmes, alors pourquoi ne pas faire partie de la solution, pour une fois ?&lt;&#x2F;p&gt;
+&lt;p&gt;Et puis, ça m&#x27;aidera peut être terminer un projet...&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>
